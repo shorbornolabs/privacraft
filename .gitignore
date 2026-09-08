@@ -1,0 +1,18 @@
+# Build & Distribution Artifacts
+*.zip
+*.crx
+*.pem
+
+# Python & Temporary Files
+__pycache__/
+*.pyc
+.system_generated/
+scratch/
+*.tmp
+*.log
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

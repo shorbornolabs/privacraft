@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PrivaCraft - Security Suite</title>
+  <link rel="stylesheet" href="styles/popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="3" ry="3"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            <circle cx="12" cy="16" r="1.5"/>
+          </svg>
+        </div>
+        <div class="brand-info">
+          <span class="brand-name">PrivaCraft</span>
+          <span class="brand-tag">PRO</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <!-- Theme Palette Switcher -->
+        <button id="btn-theme" class="btn-icon-header" title="Switch Theme Accent">
+          <span class="theme-dot"></span>
+        </button>
+        <!-- Sound Toggle -->
+        <button id="btn-sound" class="btn-icon-header" title="Toggle Sound Feedback">
+          <svg class="sound-on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          <svg class="sound-off" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+        </button>
+        <button id="btn-bulk" class="btn-ghost" title="Bulk Generator">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <span>Bulk</span>
+        </button>
+        <button id="btn-history" class="btn-ghost" title="Password History">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>History</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Mode Selector Tabs (Clean 3-Option Floating Glass Dock) -->
+    <nav class="mode-nav">
+      <button class="mode-tab active" data-mode="tempmail" title="Disposable Temp Email & Inbox">
+        <svg class="nav-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span>Temp Mail</span>
+      </button>
+      <button class="mode-tab" data-mode="password" title="Passwords & Generator">
+        <svg class="nav-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span>Password</span>
+      </button>
+      <button class="mode-tab" data-mode="totp" title="Live 2FA Authenticator">
+        <span class="live-dot"></span>
+        <span>2FA</span>
+      </button>
+    </nav>
+
+    <!-- Standard Mode Output Card (Shown for Password, Passphrase, PIN, Auditor) -->
+    <div id="general-display-group" style="display: none;">
+      <!-- Password Display Card -->
+      <section class="display-card">
+        <div class="output-wrapper">
+          <div id="password-output" class="password-text" title="Click to copy">Generating...</div>
+          <div class="output-tools">
+            <button id="btn-toggle-mask" class="btn-icon" title="Toggle Visibility">
+              <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+            <button id="btn-regenerate" class="btn-icon" title="Regenerate (Space/Enter)">
+              <svg class="icon-refresh" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 4v6h-6M1 20v-6h6"/>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Action Buttons -->
+        <div class="action-grid">
+          <button id="btn-copy" class="btn-primary-action">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            <span class="copy-label">Copy</span>
+          </button>
+          <button id="btn-fill" class="btn-secondary-action" title="Autofill active input on current webpage">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+            <span>Fill</span>
+          </button>
+          <button id="btn-qr" class="btn-secondary-action" title="Show QR code for mobile scan or Wi-Fi">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="6" height="6"/><rect x="15" y="3" width="6" height="6"/><rect x="3" y="15" width="6" height="6"/><path d="M15 15h2v2h-2zM19 19h2v2h-2zM15 19h2v2h-2zM19 15h2v2h-2z"/>
+            </svg>
+            <span>QR</span>
+          </button>
+          <button id="btn-phonetic" class="btn-secondary-action" title="View NATO Phonetic spelling for dictation">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+            <span>Phonetic</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Strength & Security Analytics Card -->
+      <section class="security-card">
+        <div class="security-header">
+          <div class="security-tier">
+            <span class="security-title">Strength:</span>
+            <span id="strength-label" class="tier-label">Strong</span>
+          </div>
+          <div class="security-meta">
+            <span id="entropy-badge" class="entropy-tag">0 bits</span>
+          </div>
+        </div>
+
+        <!-- Segmented Strength Bar -->
+        <div id="strength-bar" class="strength-segments">
+          <div class="segment"></div>
+          <div class="segment"></div>
+          <div class="segment"></div>
+          <div class="segment"></div>
+          <div class="segment"></div>
+        </div>
+
+        <div class="security-footer">
+          <span class="crack-desc">Crack time estimate:</span>
+          <span id="crack-time-val" class="crack-val">Calculating...</span>
+        </div>
+      </section>
+
+      <!-- Password Type Sub-Nav (Pass / Phrase / PIN / Audit) -->
+      <div class="pwd-subnav">
+        <button class="sub-tab active" data-submode="password" title="Random Password">Pass</button>
+        <button class="sub-tab" data-submode="passphrase" title="Memorable Passphrase">Phrase</button>
+        <button class="sub-tab" data-submode="pin" title="Numeric PIN">PIN</button>
+        <button class="sub-tab" data-submode="auditor" title="Password Strength Auditor">Audit</button>
+      </div>
+    </div>
+
+    <!-- Controls Panel: Password Mode -->
+    <section id="panel-password" class="controls-panel">
+      <div class="control-group">
+        <div class="control-header">
+          <span class="control-label">Length</span>
+          <span id="pwd-length-val" class="length-badge">18</span>
+        </div>
+        <div class="slider-wrapper">
+          <input type="range" id="pwd-length-slider" min="6" max="64" value="18" class="custom-slider">
+        </div>
+        <div class="presets-row">
+          <button class="pwd-preset" data-val="12">12</button>
+          <button class="pwd-preset" data-val="16">16</button>
+          <button class="pwd-preset active" data-val="18">18</button>
+          <button class="pwd-preset" data-val="24">24</button>
+          <button class="pwd-preset" data-val="32">32</button>
+        </div>
+      </div>
+
+      <div class="toggles-list">
+        <label class="toggle-item">
+          <span class="toggle-text">Uppercase (A-Z)</span>
+          <input type="checkbox" id="opt-upper" checked class="sr-only">
+          <span class="switch"></span>
+        </label>
+        <label class="toggle-item">
+          <span class="toggle-text">Lowercase (a-z)</span>
+          <input type="checkbox" id="opt-lower" checked class="sr-only">
+          <span class="switch"></span>
+        </label>
+        <label class="toggle-item">
+          <span class="toggle-text">Numbers (0-9)</span>
+          <input type="checkbox" id="opt-numbers" checked class="sr-only">
+          <span class="switch"></span>
+        </label>
+        <label class="toggle-item">
+          <span class="toggle-text">Symbols (!@#$%^&*)</span>
+          <input type="checkbox" id="opt-symbols" checked class="sr-only">
+          <span class="switch"></span>
+        </label>
+        <label class="toggle-item">
+          <div class="toggle-col">
+            <span class="toggle-text">Avoid Ambiguous</span>
+            <span class="toggle-sub">Excludes (l, 1, I, 0, O, o)</span>
+          </div>
+          <input type="checkbox" id="opt-ambiguous" class="sr-only">
+          <span class="switch"></span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Controls Panel: Passphrase Mode -->
+    <section id="panel-passphrase" class="controls-panel">
+      <div class="control-group">
+        <div class="control-header">
+          <span class="control-label">Word Count</span>
+          <span id="pass-length-val" class="length-badge">4</span>
+        </div>
+        <div class="slider-wrapper">
+          <input type="range" id="pass-length-slider" min="3" max="8" value="4" class="custom-slider">
+        </div>
+      </div>
+
+      <div class="select-group">
+        <label class="select-label" for="pass-separator">Separator</label>
+        <select id="pass-separator" class="custom-select">
+          <option value="-">Hyphen (-)</option>
+          <option value="_">Underscore (_)</option>
+          <option value=".">Period (.)</option>
+          <option value="space">Space ( )</option>
+          <option value="/">Slash (/)</option>
+          <option value="none">None</option>
+        </select>
+      </div>
+
+      <div class="select-group">
+        <label class="select-label" for="pass-capitalize">Capitalization</label>
+        <select id="pass-capitalize" class="custom-select">
+          <option value="title">Title Case (Word)</option>
+          <option value="lower">lowercase (word)</option>
+          <option value="upper">UPPERCASE (WORD)</option>
+        </select>
+      </div>
+
+      <div class="toggles-list">
+        <label class="toggle-item">
+          <span class="toggle-text">Include Random Number</span>
+          <input type="checkbox" id="pass-include-num" checked class="sr-only">
+          <span class="switch"></span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Controls Panel: PIN Mode -->
+    <section id="panel-pin" class="controls-panel">
+      <div class="control-group">
+        <div class="control-header">
+          <span class="control-label">PIN Digits</span>
+          <span id="pin-length-val" class="length-badge">6</span>
+        </div>
+        <div class="slider-wrapper">
+          <input type="range" id="pin-length-slider" min="4" max="16" value="6" class="custom-slider">
+        </div>
+        <div class="presets-row">
+          <button class="pin-preset" data-val="4">4 Digits</button>
+          <button class="pin-preset active" data-val="6">6 Digits</button>
+          <button class="pin-preset" data-val="8">8 Digits</button>
+          <button class="pin-preset" data-val="12">12 Digits</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Controls Panel: Password Auditor / Inspector Mode -->
+    <section id="panel-auditor" class="controls-panel">
+      <div class="auditor-box">
+        <span class="auditor-label">Audit an Existing Password</span>
+        <div class="auditor-input-row">
+          <input type="password" id="auditor-input" class="auditor-input" placeholder="Type or paste password to inspect..." autocomplete="off">
+          <button id="btn-toggle-auditor-mask" class="btn-icon" title="Reveal/Mask">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Checklist -->
+      <div class="audit-checklist">
+        <div class="check-item" id="chk-len"><span class="check-icon">✕</span><span>14+ Characters</span></div>
+        <div class="check-item" id="chk-upper"><span class="check-icon">✕</span><span>Uppercase Letters</span></div>
+        <div class="check-item" id="chk-lower"><span class="check-icon">✕</span><span>Lowercase Letters</span></div>
+        <div class="check-item" id="chk-num"><span class="check-icon">✕</span><span>Numbers</span></div>
+        <div class="check-item" id="chk-sym"><span class="check-icon">✕</span><span>Special Symbols</span></div>
+        <div class="check-item" id="chk-clean"><span class="check-icon">✕</span><span>No Obvious Patterns</span></div>
+      </div>
+
+      <button id="btn-fortify" class="btn-primary-action full-width">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>Fortify & Fix Weaknesses</span>
+      </button>
+    </section>
+
+    <!-- Recent Copied Passwords Section (Past 10) -->
+    <section id="section-copied-passwords" class="copied-passwords-section" style="display: none;">
+      <div class="copied-header">
+        <div class="copied-title-wrapper">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <span class="copied-heading">Copied Passwords</span>
+          <span id="copied-count-badge" class="badge-count">0/10</span>
+        </div>
+        <button id="btn-clear-copied" class="btn-clear-text" title="Clear copied passwords">Clear</button>
+      </div>
+      <div id="copied-passwords-list" class="copied-passwords-list"></div>
+    </section>
+
+    <!-- Controls Panel: 2FA Live Authenticator -->
+    <section id="panel-totp" class="controls-panel">
+      <!-- Saved Accounts Pill Selector -->
+      <div class="totp-accounts-wrapper">
+        <div id="totp-accounts-list" class="totp-accounts-pills">
+          <!-- Populated dynamically via JS: [+ New], Account 1, Account 2... -->
+        </div>
+      </div>
+
+      <!-- Secret Key Input Row -->
+      <div class="totp-input-box">
+        <div class="totp-input-header">
+          <span class="totp-input-label">Secret Key or otpauth://</span>
+          <div class="totp-input-actions">
+            <button id="btn-paste-totp" class="btn-subtle-text">Paste</button>
+            <button id="btn-save-totp-account" class="btn-subtle-text" title="Save to Vault">+ Save</button>
+          </div>
+        </div>
+        <div class="totp-input-row">
+          <input type="text" id="totp-key-input" class="totp-key-input" placeholder="Paste Base32 key (e.g. JBSWY3DPEHPK3PXP)..." autocomplete="off" spellcheck="false">
+          <button id="btn-clear-totp" class="btn-icon-subtle" title="Clear">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Futuristic HUD Display Card -->
+      <div class="totp-hud-card">
+        <div class="totp-hud-top">
+          <div class="totp-account-info">
+            <span id="totp-issuer-badge" class="totp-badge">INSTANT</span>
+            <span id="totp-account-label" class="totp-label">Live 2FA Generator</span>
+          </div>
+          <button id="btn-delete-totp-account" class="btn-icon-danger" title="Remove saved account" style="display: none;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
+
+        <div class="totp-hud-center">
+          <!-- Animated Circular Countdown Ring -->
+          <div class="totp-timer-ring">
+            <svg class="ring-svg" width="60" height="60" viewBox="0 0 60 60">
+              <circle class="ring-bg" cx="30" cy="30" r="25" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4.5"/>
+              <circle id="totp-progress-ring" class="ring-progress timer-safe" cx="30" cy="30" r="25" fill="none" stroke-width="4.5" stroke-dasharray="157.08" stroke-dashoffset="0" stroke-linecap="round"/>
+            </svg>
+            <span id="totp-countdown-sec" class="ring-text">30s</span>
+          </div>
+
+          <!-- Futuristic 6-digit Display -->
+          <div class="totp-code-box">
+            <div id="totp-code-display" class="totp-digits">
+              <span class="digit-group" id="totp-part1">---</span>
+              <span class="digit-dot">&bull;</span>
+              <span class="digit-group" id="totp-part2">---</span>
+            </div>
+            <span class="totp-sub-hint">Auto-refreshes every 30 seconds</span>
+          </div>
+        </div>
+
+        <!-- Action Row -->
+        <div class="totp-actions-row">
+          <button id="btn-copy-totp" class="btn-primary-action flex-1">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span class="copy-totp-label">Copy 2FA Code</span>
+          </button>
+          <button id="btn-fill-totp" class="btn-secondary-action" title="Fill OTP code into active browser page">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span>Fill Page</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Controls Panel: Temp Mail (Disposable Email & Live Inbox) -->
+    <section id="panel-tempmail" class="controls-panel active">
+      <!-- Top Config Bar: Domain selector + Survival Timer -->
+      <div class="mail-header-bar">
+        <div class="mail-domain-select-wrapper">
+          <label for="tempmail-domain-select" class="mail-label">Domain:</label>
+          <select id="tempmail-domain-select" class="custom-select mail-domain-select">
+            <option value="sharklasers.com">@sharklasers.com (Guerrilla)</option>
+            <option value="guerrillamail.com">@guerrillamail.com (Guerrilla)</option>
+            <option value="guerrillamailblock.com">@guerrillamailblock.com (Guerrilla)</option>
+            <option value="grr.la">@grr.la (Guerrilla)</option>
+            <option value="pokemail.net">@pokemail.net (Guerrilla)</option>
+            <option value="spam4.me">@spam4.me (Guerrilla)</option>
+            <option value="uberip.com">@uberip.com (Mail.tm)</option>
+          </select>
+        </div>
+
+        <div class="mail-timer-badge" title="Remaining Mailbox Lifespan">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span id="tempmail-timer-val">59:59</span>
+          <button id="btn-extend-mail" class="btn-extend-tag" title="Add 15 minutes">+15m</button>
+        </div>
+      </div>
+
+      <!-- Address Display Card -->
+      <div class="mail-card">
+        <div class="mail-address-row">
+          <div class="mail-address-text">
+            <span id="tempmail-address-val" class="mail-text">Creating mailbox...</span>
+          </div>
+          <button id="btn-refresh-inbox" class="btn-icon" title="Check for new mail">
+            <svg class="icon-refresh" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          </button>
+          <button id="btn-new-tempmail" class="btn-icon-danger" title="Discard & Create New Address">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
+
+        <!-- Action Grid -->
+        <div class="totp-actions-row">
+          <button id="btn-copy-tempmail" class="btn-primary-action flex-1">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span>Copy Address</span>
+          </button>
+          <button id="btn-fill-tempmail" class="btn-secondary-action" title="Autofill email into active webpage input">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span>Fill Page</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Inbox Container -->
+      <div class="mail-inbox-section">
+        <div class="mail-inbox-header">
+          <div class="mail-inbox-title">
+            <span class="live-dot mail-live-dot"></span>
+            <span>Live Inbox</span>
+            <span id="tempmail-msg-count" class="badge-count">0</span>
+          </div>
+          <span class="mail-poll-hint">Auto-checks every 8s</span>
+        </div>
+
+        <div id="tempmail-messages-list" class="mail-messages-list">
+          <!-- Dynamically populated messages or empty state -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <span class="shortcut-tip"><kbd>Space</kbd> Generate &bull; <kbd>Ctrl+C</kbd> Copy</span>
+    </footer>
+  </div>
+
+  <!-- Modal Backdrop -->
+  <div id="modal-backdrop" class="modal-backdrop"></div>
+
+  <!-- View Full Email Message Modal -->
+  <div id="modal-view-email" class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Email Message</h3>
+      <button id="btn-close-email" class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body email-detail-body">
+      <div class="email-meta-card">
+        <div class="email-meta-row">
+          <span class="email-meta-label">From:</span>
+          <span id="email-detail-from" class="email-meta-val">-</span>
+        </div>
+        <div class="email-meta-row">
+          <span class="email-meta-label">Subject:</span>
+          <span id="email-detail-subject" class="email-meta-val bold">-</span>
+        </div>
+        <div class="email-meta-row">
+          <span class="email-meta-label">Date:</span>
+          <span id="email-detail-date" class="email-meta-val">-</span>
+        </div>
+      </div>
+
+      <!-- Extracted Security Code Banner (if detected) -->
+      <div id="email-otp-banner" class="email-otp-banner" style="display:none;">
+        <div class="otp-badge-text">
+          <span class="otp-hint">Detected Verification Code:</span>
+          <span id="email-detected-code" class="otp-code-highlight">123456</span>
+        </div>
+        <button id="btn-copy-email-code" class="btn-primary-action btn-sm">Copy Code</button>
+      </div>
+
+      <!-- Extracted Activation Link (if detected) -->
+      <div id="email-link-banner" class="email-link-banner" style="display:none;">
+        <a id="email-detected-link" href="#" target="_blank" class="btn-secondary-action full-width link-btn">Open Verification Link &rarr;</a>
+      </div>
+
+      <!-- Email Body -->
+      <div id="email-detail-body" class="email-body-content">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Save 2FA Account Modal -->
+  <div id="modal-save-totp" class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Save 2FA to Vault</h3>
+      <button id="btn-close-save-totp" class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" for="save-totp-label">Account Label</label>
+        <input type="text" id="save-totp-label" class="modal-input" placeholder="e.g. imazan@gmail.com, personal, etc.">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="save-totp-issuer">Service / Issuer</label>
+        <input type="text" id="save-totp-issuer" class="modal-input" placeholder="e.g. GitHub, Google, Discord, Binance">
+      </div>
+      <button id="btn-confirm-save-totp" class="btn-primary-action full-width">Save Account</button>
+    </div>
+  </div>
+
+  <!-- QR Code Modal (with Wi-Fi support) -->
+  <div id="modal-qr" class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Mobile QR Transfer</h3>
+      <button id="btn-close-qr" class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body qr-body">
+      <!-- QR Sub-tabs -->
+      <div class="qr-mode-switch">
+        <button id="qr-tab-raw" class="qr-tab active">Password QR</button>
+        <button id="qr-tab-wifi" class="qr-tab">Wi-Fi Connect QR</button>
+      </div>
+
+      <!-- Wi-Fi Options Row (hidden by default) -->
+      <div id="wifi-config-box" class="wifi-config" style="display: none;">
+        <input type="text" id="wifi-ssid" class="wifi-input" placeholder="Wi-Fi Name (SSID)...">
+        <select id="wifi-enc" class="custom-select">
+          <option value="WPA">WPA/WPA2/WPA3</option>
+          <option value="WEP">WEP</option>
+          <option value="nopass">Open (No Pass)</option>
+        </select>
+      </div>
+
+      <div id="qr-container" class="qr-box"></div>
+      <p id="qr-hint-text" class="modal-hint">Scan with your phone's camera to transfer password securely without syncing.</p>
+    </div>
+  </div>
+
+  <!-- Phonetic Spelling Modal -->
+  <div id="modal-phonetic" class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Phonetic Spelling (NATO)</h3>
+      <button id="btn-close-phonetic" class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-hint-top">Use this phonetic guide to read your password clearly over calls or dictation.</p>
+      <div id="phonetic-list" class="phonetic-container"></div>
+      <button id="btn-copy-phonetic" class="btn-primary-action full-width">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span>Copy Phonetic Dictation</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Bulk Passwords Modal -->
+  <div id="modal-bulk" class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Batch Passwords</h3>
+      <button id="btn-close-bulk" class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="bulk-list" class="bulk-container"></div>
+      <button id="btn-copy-bulk" class="btn-primary-action full-width">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span>Copy All Passwords</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- History Modal -->
+  <div id="modal-history" class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Recent Passwords</h3>
+      <div class="modal-header-actions">
+        <button id="btn-clear-history" class="btn-danger-text">Clear</button>
+        <button id="btn-close-history" class="modal-close">&times;</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div id="history-list" class="history-container"></div>
+    </div>
+  </div>
+
+  <!-- Floating Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Scripts in dependency order -->
+  <script src="scripts/generator.js"></script>
+  <script src="scripts/strength.js"></script>
+  <script src="scripts/phonetic.js"></script>
+  <script src="scripts/audio.js"></script>
+  <script src="scripts/totp.js"></script>
+  <script src="scripts/tempmail.js"></script>
+  <script src="scripts/qr.js"></script>
+  <script src="scripts/storage.js"></script>
+  <script src="scripts/popup.js"></script>
+</body>
+</html>

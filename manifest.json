@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "PrivaCraft - Temp Mail & 2FA Vault",
+  "version": "1.0.0",
+  "description": "Disposable temp email with live inbox, 30s 2FA live authenticator, and secure password generator with zero RAM drain.",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "PrivaCraft - Temp Mail & 2FA Vault",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "background": {
+    "service_worker": "scripts/background.js"
+  },
+  "permissions": [
+    "storage",
+    "clipboardWrite",
+    "activeTab",
+    "scripting",
+    "alarms",
+    "notifications",
+    "offscreen"
+  ],
+  "host_permissions": [
+    "https://api.mail.tm/*",
+    "https://api.guerrillamail.com/*"
+  ]
+}
