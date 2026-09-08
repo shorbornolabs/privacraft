@@ -2,7 +2,7 @@
 
 [![Chrome Manifest V3](https://img.shields.io/badge/Chrome-Manifest%20V3-blue?logo=googlechrome&logoColor=white)](extension/)
 [![Android App](https://img.shields.io/badge/Android-Jetpack%20Compose-3DDC84?logo=android&logoColor=white)](privacraft-android/)
-[![Download APK](https://img.shields.io/badge/Release-PrivaCraft--v1.0.0.apk-orange?logo=android&logoColor=white)](release/PrivaCraft-v1.0.0.apk)
+[![Download APK](https://img.shields.io/badge/Release-PrivaCraft--v1.0.0.apk-orange?logo=android&logoColor=white)](https://github.com/shorbornolabs/privacraft/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Privacy: Zero Tracking](https://img.shields.io/badge/Privacy-Zero%20Tracking-green)](PRIVACY_POLICY.md)
 [![Memory: 0--RAM Idle](https://img.shields.io/badge/Memory-0%20RAM%20Idle-purple)]()
@@ -20,7 +20,8 @@
 | Platform | Location | Description |
 |:---|:---|:---|
 | 💻 **Browser Extension** | [`extension/`](extension/) | Manifest V3 extension for Chrome, Brave, Edge, Opera & Kiwi |
-| 📱 **Android APK (Direct Download)** | [**PrivaCraft.apk**](PrivaCraft.apk) or [`release/PrivaCraft-v1.0.0.apk`](release/PrivaCraft-v1.0.0.apk) | Pre-compiled, installable offline release APK (v1.0.0) |
+| 📱 **Android APK (Direct Download)** | [**Download PrivaCraft-v1.0.0.apk**](https://github.com/shorbornolabs/privacraft/releases/download/v1.0.0/PrivaCraft-v1.0.0.apk) | Pre-compiled, installable offline release APK (v1.0.0) |
+| 🏷️ **GitHub Release** | [**v1.0.0 Release**](https://github.com/shorbornolabs/privacraft/releases/tag/v1.0.0) | Official release notes & verified asset binary |
 | 🤖 **Android Source Code** | [`privacraft-android/`](privacraft-android/) | Full Android Studio project (Kotlin + Jetpack Compose) |
 
 ---
@@ -108,11 +109,12 @@ PrivaCraft is distributed directly as an independent open-source APK so you don'
 
 ### Step 1: Download the APK
 Download the APK file directly to your Android phone or tablet:
-- Direct Root Link: [**PrivaCraft.apk**](PrivaCraft.apk)
-- Release Folder Link: [**release/PrivaCraft-v1.0.0.apk**](release/PrivaCraft-v1.0.0.apk)
+- 🚀 **Direct APK Download**: [**PrivaCraft-v1.0.0.apk**](https://github.com/shorbornolabs/privacraft/releases/download/v1.0.0/PrivaCraft-v1.0.0.apk)
+- 🏷️ **GitHub Release Page**: [**View Release v1.0.0**](https://github.com/shorbornolabs/privacraft/releases/tag/v1.0.0)
+- 📦 **Local Repository Links**: [**`PrivaCraft.apk`**](PrivaCraft.apk) or [**`release/PrivaCraft-v1.0.0.apk`**](release/PrivaCraft-v1.0.0.apk)
 
 ### Step 2: Allow Installation of Unknown Apps
-1. Open your device's **Downloads** folder (or browser download notification) and tap **`PrivaCraft.apk`**.
+1. Open your device's **Downloads** folder (or browser download notification) and tap **`PrivaCraft-v1.0.0.apk`** (or `PrivaCraft.apk`).
 2. If Android displays a prompt saying:
    > *"For your security, your phone is not allowed to install unknown apps from this source"*
 3. Tap **Settings** on the prompt.
