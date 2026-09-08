@@ -10,6 +10,18 @@
 1. ✉️ **Disposable Temp Mail** with real-time inboxes and instant OTP code extraction.
 2. ⚡ **2FA Live Cyber Authenticator** with animated circular countdown ring and local vault.
 3. 🔐 **Cryptographic Password Studio** with session persistence, entropy analysis, and a **10-item copied passwords list**.
+---
+
+## 📸 Interface Preview
+
+<div align="center">
+
+| ✉️ Disposable Temp Mail | 🔐 Password Studio & Copied List | ⚡ 2FA Live Authenticator |
+|:---:|:---:|:---:|
+| <img src="screenshots/temp-mail.png" width="250" alt="PrivaCraft Temp Mail View" /> | <img src="screenshots/password-studio.png" width="250" alt="PrivaCraft Password Studio View" /> | <img src="screenshots/2fa-authenticator.png" width="250" alt="PrivaCraft 2FA Live Authenticator" /> |
+| *10+ Free Domains, Live Inbox & OTP Extractor* | *CSPRNG Generator & Copied Passwords List* | *RFC 6238 TOTP Engine & Cyber Countdown* |
+
+</div>
 
 ---
 
