@@ -24,4 +24,7 @@ build/
 **/build/
 local.properties
 .cxx/
+*.jks
+*.keystore
+playstore/*.aab
 
