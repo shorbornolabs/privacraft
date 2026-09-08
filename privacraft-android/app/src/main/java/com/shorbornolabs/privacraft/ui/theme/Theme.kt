@@ -21,4 +21,4 @@ fun PrivaCraftTheme(content: @Composable () -> Unit) {
         colorScheme = DarkColorScheme,
         content = content
     )
-}\n
+}

@@ -302,4 +302,4 @@ fun TotpScreen(
             }
         )
     }
-}\n
+}

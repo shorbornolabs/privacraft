@@ -2,9 +2,7 @@ package com.shorbornolabs.privacraft.domain
 
 import com.shorbornolabs.privacraft.data.model.PasswordAnalysis
 import java.security.SecureRandom
-import kotlin.math.ln
 import kotlin.math.log2
-import kotlin.math.pow
 
 object PasswordGenerator {
 
@@ -16,7 +14,6 @@ object PasswordGenerator {
     private const val SYMBOLS = "!@#$%^&*()_+-=[]{}|;:,.<>?"
     private val AMBIGUOUS_CHARS = setOf('l', '1', 'I', '0', 'O', 'o')
 
-    // High-entropy Diceware words list
     private val WORD_LIST = listOf(
         "anchor", "apollo", "beacon", "breeze", "canyon", "castle", "cipher", "comet",
         "cosmic", "crater", "crystal", "delta", "dragon", "echo", "eclipse", "falcon",
@@ -87,7 +84,6 @@ object PasswordGenerator {
             result[remainingCount + i] = required[i]
         }
 
-        // Shuffle securely
         for (i in result.indices.reversed()) {
             val j = secureRandom.nextInt(i + 1)
             val temp = result[i]
@@ -134,7 +130,7 @@ object PasswordGenerator {
         val hasLower = password.any { it.isLowerCase() }
         val hasNumber = password.any { it.isDigit() }
         val hasSymbol = password.any { !it.isLetterOrDigit() }
-        val isClean = password.distinct().size >= len * 0.6
+        val isClean = password.toSet().size >= len * 0.6
 
         var poolSize = 0
         if (hasUpper) poolSize += 26
@@ -201,4 +197,4 @@ object PasswordGenerator {
     }
 
     private data class Quad(val a: Int, val b: String, val c: String, val d: String)
-}\n
+}

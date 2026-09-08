@@ -46,4 +46,4 @@ data class PasswordAnalysis(
     val hasNumber: Boolean,
     val hasSymbol: Boolean,
     val isClean: Boolean
-)\n
+)

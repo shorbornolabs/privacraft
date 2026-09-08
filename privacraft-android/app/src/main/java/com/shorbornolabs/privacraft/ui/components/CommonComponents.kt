@@ -8,6 +8,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,6 +26,104 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shorbornolabs.privacraft.ui.theme.*
+
+@Composable
+fun PrivaCraftTopBar(
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = BgDark
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // Centered Brand: Shield Icon + PrivaCraft Title + PRO Badge
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                // Cyber Shield Icon
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(RoundedCornerShape(11.dp))
+                        .background(
+                            Brush.linearGradient(
+                                listOf(AccentCyan.copy(alpha = 0.25f), AccentIndigo.copy(alpha = 0.25f))
+                            )
+                        )
+                        .border(
+                            1.dp,
+                            Brush.linearGradient(listOf(AccentCyan, AccentIndigo)),
+                            RoundedCornerShape(11.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Security,
+                        contentDescription = "PrivaCraft Shield",
+                        tint = AccentCyan,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "PrivaCraft",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.White,
+                        letterSpacing = 0.5.sp
+                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(5.dp))
+                            .background(AccentIndigo.copy(alpha = 0.25f))
+                            .border(1.dp, AccentIndigo.copy(alpha = 0.6f), RoundedCornerShape(5.dp))
+                            .padding(horizontal = 6.dp, vertical = 1.5.dp)
+                    ) {
+                        Text(
+                            text = "PRO",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            color = AccentCyan
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(3.dp))
+
+            // Centered Subtitle with active security indicator
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(6.dp)
+                        .clip(CircleShape)
+                        .background(AccentGreen)
+                )
+                Text(
+                    text = "Privacy & Security Suite",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = TextMuted
+                )
+            }
+        }
+    }
+}
 
 @Composable
 fun CyberCard(
@@ -71,10 +171,16 @@ fun CyberNavDock(
                 modifier = Modifier
                     .weight(1f)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(
-                        if (isSelected) Brush.verticalGradient(
-                            listOf(color.copy(alpha = 0.25f), color.copy(alpha = 0.08f))
-                        ) else Color.Transparent
+                    .then(
+                        if (isSelected) {
+                            Modifier.background(
+                                Brush.verticalGradient(
+                                    listOf(color.copy(alpha = 0.25f), color.copy(alpha = 0.08f))
+                                )
+                            )
+                        } else {
+                            Modifier.background(Color.Transparent)
+                        }
                     )
                     .clickable { onTabSelected(id) }
                     .padding(vertical = 10.dp),
@@ -112,12 +218,10 @@ fun AnimatedCircularCountdown(
         contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.size(size)) {
-            // Background track
             drawCircle(
                 color = BorderSubtle.copy(alpha = 0.5f),
                 style = Stroke(strokeWidth.toPx())
             )
-            // Progress arc
             drawArc(
                 color = ringColor,
                 startAngle = -90f,
@@ -135,4 +239,4 @@ fun AnimatedCircularCountdown(
             color = ringColor
         )
     }
-}\n
+}

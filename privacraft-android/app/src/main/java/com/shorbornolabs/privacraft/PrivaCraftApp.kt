@@ -30,4 +30,4 @@ class PrivaCraftApp : Application() {
             notificationManager.createNotificationChannel(channel)
         }
     }
-}\n
+}

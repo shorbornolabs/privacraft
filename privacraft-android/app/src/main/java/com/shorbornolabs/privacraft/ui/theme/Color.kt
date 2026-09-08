@@ -15,4 +15,4 @@ val AccentRose = Color(0xFFEF4444)
 
 val TextPrimary = Color(0xFFF8FAFC)
 val TextMuted = Color(0xFF94A3B8)
-val TextDim = Color(0xFF64748B)\n
+val TextDim = Color(0xFF64748B)

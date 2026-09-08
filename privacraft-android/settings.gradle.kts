@@ -20,4 +20,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "PrivaCraft"
-include(":app")\n
+include(":app")

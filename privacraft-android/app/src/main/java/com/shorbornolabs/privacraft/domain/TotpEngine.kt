@@ -67,4 +67,4 @@ data class TotpResult(
     val remainingSeconds: Int,
     val progressFraction: Float,
     val isError: Boolean = false
-)\n
+)

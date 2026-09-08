@@ -7,13 +7,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.shorbornolabs.privacraft.data.repository.StorageRepository
 import com.shorbornolabs.privacraft.data.repository.TempMailRepository
 import com.shorbornolabs.privacraft.ui.components.CyberNavDock
+import com.shorbornolabs.privacraft.ui.components.PrivaCraftTopBar
 import com.shorbornolabs.privacraft.ui.screens.PasswordScreen
 import com.shorbornolabs.privacraft.ui.screens.TempMailScreen
 import com.shorbornolabs.privacraft.ui.screens.TotpScreen
@@ -35,6 +35,10 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
+                    containerColor = BgDark,
+                    topBar = {
+                        PrivaCraftTopBar()
+                    },
                     bottomBar = {
                         CyberNavDock(
                             currentTab = currentTab,
@@ -45,13 +49,11 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 ) { innerPadding ->
-                    Surface(
+                    Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(BgDark)
                             .padding(innerPadding)
-                            .statusBarsPadding(),
-                        color = BgDark
                     ) {
                         when (currentTab) {
                             "tempmail" -> TempMailScreen(repository = tempMailRepository)
@@ -63,4 +65,4 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}\n
+}

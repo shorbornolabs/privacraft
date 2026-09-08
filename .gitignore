@@ -16,3 +16,12 @@ scratch/
 Thumbs.db
 .vscode/
 .idea/
+*.iml
+
+# Android & Gradle Build Artifacts
+.gradle/
+build/
+**/build/
+local.properties
+.cxx/
+

@@ -104,4 +104,4 @@ class StorageRepository(context: Context) {
         _lastPassword.value = password
         prefs.edit().putString("last_active_password", password).apply()
     }
-}\n
+}
