@@ -3,6 +3,7 @@
 [![Chrome Manifest V3](https://img.shields.io/badge/Chrome-Manifest%20V3-blue?logo=googlechrome&logoColor=white)](extension/)
 [![Android App](https://img.shields.io/badge/Android-Jetpack%20Compose-3DDC84?logo=android&logoColor=white)](privacraft-android/)
 [![Download APK](https://img.shields.io/badge/Release-PrivaCraft--v1.0.0.apk-orange?logo=android&logoColor=white)](https://github.com/shorbornolabs/privacraft/releases/latest)
+[![Creator LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/azaharonline24/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Privacy: Zero Tracking](https://img.shields.io/badge/Privacy-Zero%20Tracking-green)](PRIVACY_POLICY.md)
 [![Memory: 0--RAM Idle](https://img.shields.io/badge/Memory-0%20RAM%20Idle-purple)]()
@@ -23,6 +24,7 @@
 | 📱 **Android APK (Direct Download)** | [**Download PrivaCraft-v1.0.0.apk**](https://github.com/shorbornolabs/privacraft/releases/download/v1.0.0/PrivaCraft-v1.0.0.apk) | Pre-compiled, installable offline release APK (v1.0.0) |
 | 🏷️ **GitHub Release** | [**v1.0.0 Release**](https://github.com/shorbornolabs/privacraft/releases/tag/v1.0.0) | Official release notes & verified asset binary |
 | 🤖 **Android Source Code** | [`privacraft-android/`](privacraft-android/) | Full Android Studio project (Kotlin + Jetpack Compose) |
+| 👨‍💻 **Creator Profile** | [**LinkedIn Profile**](https://www.linkedin.com/in/azaharonline24/) | Connect with the creator on LinkedIn |
 
 ---
 
@@ -220,6 +222,17 @@ The output APK will be generated at `app/build/outputs/apk/release/app-release-u
 - **Local Sandbox Storage**: Settings, 2FA keys, and copied password history are stored exclusively in local sandboxed storage (`chrome.storage.local` on Chrome, Jetpack DataStore on Android).
 - **Strict Content Security Policy**: Zero inline scripts, zero `eval()`, and zero dynamic remote code loading.
 - Read our full [Privacy Policy](PRIVACY_POLICY.md).
+
+---
+
+## 👨‍💻 Creator & Maintainer
+
+PrivaCraft is created and actively maintained by **Md. Azahar Ali** ([@shorbornolabs](https://github.com/shorbornolabs)).
+
+- 💼 **LinkedIn**: [linkedin.com/in/azaharonline24](https://www.linkedin.com/in/azaharonline24/)
+- 🌐 **GitHub**: [github.com/shorbornolabs](https://github.com/shorbornolabs)
+
+[![Connect on LinkedIn](https://img.shields.io/badge/LinkedIn-Connect%20on%20LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/azaharonline24/)
 
 ---
 
