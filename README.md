@@ -4,6 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Privacy: Zero Tracking](https://img.shields.io/badge/Privacy-Zero%20Tracking-green)](PRIVACY_POLICY.md)
 [![Memory: 0--RAM Idle](https://img.shields.io/badge/Memory-0%20RAM%20Idle-purple)]()
+[![Android App](https://img.shields.io/badge/Android-Jetpack%20Compose-3DDC84?logo=android&logoColor=white)](privacraft-android/)
 
 **PrivaCraft** is a modern, privacy-first open-source Chrome extension combining three essential cybersecurity tools into an ultra-fast, zero-bloat browser popup:
 
@@ -54,6 +55,11 @@
 - **Password Auditor**: Interactive weakness checklist with a 1-click **"Fortify"** auto-fixer.
 - **NATO Phonetic Spelling Guide**: Audio/voice breakdown for phone verification (e.g. `UPPER-Kilo • Nine • Hash • Mike`).
 - **Wi-Fi QR Code Generator**: Generate offline QR codes to instantly share Wi-Fi credentials.
+
+### 5. 📱 Native Android App (Jetpack Compose)
+- A complete native Android mobile app version of PrivaCraft is included in [privacraft-android/](privacraft-android/)!
+- Built with **Kotlin** and **Jetpack Compose** with matching glassmorphism dark theme, live OTP extraction, 30s circular countdown ring, and the 10-item copied passwords list.
+- Ready to open, build, and deploy directly in **Android Studio**.
 
 ### 4. Zero-RAM Footprint & Responsive Design
 - **Zero-RAM Architecture**: Background polling and timers sleep when the popup is closed, using lightweight Manifest V3 alarms and offscreen audio when needed.
