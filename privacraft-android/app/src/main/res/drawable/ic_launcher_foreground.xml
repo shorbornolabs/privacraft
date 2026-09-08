@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Glowing Shield -->
+    <path
+        android:fillColor="#6366F1"
+        android:pathData="M54,22 L76,32 C76,54 54,74 54,86 C54,74 32,54 32,32 Z" />
+    <!-- Inner Lock Padlock -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M49,46 C49,43.2 51.2,41 54,41 C56.8,41 59,43.2 59,46 L59,50 L49,50 Z M46,50 L62,50 C63.1,50 64,50.9 64,52 L64,63 C64,64.1 63.1,65 62,65 L46,65 C44.9,65 44,64.1 44,63 L44,52 C44,50.9 44.9,50 46,50 Z" />
+</vector>
