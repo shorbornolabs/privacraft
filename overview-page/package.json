@@ -1,0 +1,19 @@
+{
+  "name": "privacraft-overview",
+  "version": "1.0.1",
+  "private": true,
+  "description": "PrivaCraft Official Overview & Interactive Security Suite Landing Page",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "keywords": [
+    "privacy",
+    "security",
+    "authenticator",
+    "totp",
+    "2fa",
+    "cybersecurity"
+  ],
+  "author": "Md. Azahar Ali (Shorborno Labs)",
+  "license": "MIT"
+}
