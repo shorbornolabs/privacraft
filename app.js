@@ -2,7 +2,9 @@
 (function() {
   'use strict';
 
+  // ===========================================================================
   // 1. Audio Synthesizer (Web Audio API)
+  // ===========================================================================
   let audioCtx = null;
   let soundEnabled = false;
 
@@ -42,7 +44,9 @@
     });
   }
 
-  // 2. Toast Notifications
+  // ===========================================================================
+  // 2. Toast System
+  // ===========================================================================
   window.showToast = function(message, isSuccess = true) {
     playTone(isSuccess ? 1020 : 440, 0.07);
     const container = document.getElementById('toast-container');
@@ -74,7 +78,9 @@
     });
   };
 
-  // 3. Tab Switcher
+  // ===========================================================================
+  // 3. Navigation Tabs Switcher
+  // ===========================================================================
   const tabs = document.querySelectorAll('.tab-btn');
   const panes = document.querySelectorAll('.tab-content');
   tabs.forEach(tab => {
@@ -88,7 +94,9 @@
     });
   });
 
-  // 4. REAL RFC 6238 Web Crypto TOTP Authenticator Engine
+  // ===========================================================================
+  // 4. INSTANT 2FA GENERATOR & VAULT (Clean HUD, Real Web Crypto RFC 6238)
+  // ===========================================================================
   const BASE32_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
   function base32ToUint8Array(base32Str) {
@@ -120,10 +128,10 @@
     return output;
   }
 
-  async function generateTotpCode(secretBase32, timestampSeconds = null, period = 30, digits = 6) {
+  async function computeTotp(secretBase32, timestampSeconds = null) {
     try {
       const keyBytes = base32ToUint8Array(secretBase32);
-      if (keyBytes.length === 0) return '000000';
+      if (keyBytes.length === 0) return '------';
 
       const cryptoKey = await window.crypto.subtle.importKey(
         'raw',
@@ -134,7 +142,7 @@
       );
 
       const epoch = timestampSeconds || Math.floor(Date.now() / 1000);
-      const counter = Math.floor(epoch / period);
+      const counter = Math.floor(epoch / 30);
 
       const counterBuffer = new ArrayBuffer(8);
       const counterView = new DataView(counterBuffer);
@@ -151,191 +159,221 @@
         ((hmacResult[offset + 2] & 0xff) << 8) |
         (hmacResult[offset + 3] & 0xff);
 
-      const otp = binary % Math.pow(10, digits);
-      return otp.toString().padStart(digits, '0');
+      const otp = binary % 1000000;
+      return otp.toString().padStart(6, '0');
     } catch (e) {
       return '------';
     }
   }
 
-  const VAULT_STORAGE_KEY = 'privacraft_web_vault_accounts';
-  const DEFAULT_ACCOUNTS = [
-    { id: '1', issuer: 'GitHub', name: 'GitHub Enterprise', account: 'dev@shorborno.io', secret: 'JBSWY3DPEHPK3PXP', color: '#24292e', icon: 'GH' },
-    { id: '2', issuer: 'Cloudflare', name: 'Zero Trust Access', account: 'admin@privacraft.org', secret: 'KRUGS4ZANFZSA3TPOQQGKYTD', color: '#f38020', icon: 'CF' },
-    { id: '3', issuer: 'ProtonMail', name: 'Encrypted Relay', account: 'sec-ops@pm.me', secret: 'MZXW6YTBOI======', color: '#6d4aff', icon: 'PM' },
-    { id: '4', issuer: 'AWS', name: 'Root Infrastructure', account: 'root@cloud-vault', secret: 'NBSWY3DPEHPK3PXP', color: '#ff9900', icon: 'AWS' }
-  ];
+  // 2FA DOM Elements
+  const inputTotpKey = document.getElementById('totp-key-input');
+  const btnPasteTotp = document.getElementById('btn-paste-totp');
+  const btnClearTotp = document.getElementById('btn-clear-totp');
+  const totpPart1 = document.getElementById('totp-part1');
+  const totpPart2 = document.getElementById('totp-part2');
+  const btnCopyTotp = document.getElementById('btn-copy-totp');
+  const totpRingCircle = document.getElementById('totp-ring-circle');
+  const totpCountdownSec = document.getElementById('totp-countdown-sec');
+  const btnSaveAccount = document.getElementById('btn-save-current-totp');
+  const savedPillsContainer = document.getElementById('saved-totp-pills');
 
-  function getVaultAccounts() {
+  // Stored Vault Accounts
+  const VAULT_STORAGE_KEY = 'privacraft_web_saved_keys';
+  function getSavedVault() {
     try {
       const stored = localStorage.getItem(VAULT_STORAGE_KEY);
-      if (stored) return JSON.parse(stored);
-    } catch(e) {}
-    localStorage.setItem(VAULT_STORAGE_KEY, JSON.stringify(DEFAULT_ACCOUNTS));
-    return DEFAULT_ACCOUNTS;
+      return stored ? JSON.parse(stored) : [];
+    } catch(e) { return []; }
   }
 
-  function saveVaultAccounts(accounts) {
-    localStorage.setItem(VAULT_STORAGE_KEY, JSON.stringify(accounts));
+  function saveVaultList(list) {
+    localStorage.setItem(VAULT_STORAGE_KEY, JSON.stringify(list));
+    renderSavedPills();
   }
 
-  const totpContainer = document.getElementById('totp-cards-container');
-  const totpTimerCircle = document.getElementById('totp-timer-circle');
-  const totpSecondsLabel = document.getElementById('totp-seconds-label');
+  let currentRawTotpCode = '------';
 
-  async function renderTotpCards() {
-    if (!totpContainer) return;
-    const accounts = getVaultAccounts();
-    totpContainer.innerHTML = '';
+  async function updateActiveTotp() {
+    let key = inputTotpKey ? inputTotpKey.value.trim() : '';
+    if (key.startsWith('otpauth://totp/')) {
+      try {
+        const url = new URL(key);
+        key = url.searchParams.get('secret') || key;
+      } catch(err) {}
+    }
+    key = key.replace(/[\s\-_=]/g, '').toUpperCase();
 
-    for (const acc of accounts) {
-      const code = await generateTotpCode(acc.secret);
-      const splitCode = code.length === 6 ? `${code.slice(0, 3)} ${code.slice(3)}` : code;
-
-      const card = document.createElement('div');
-      card.className = 'totp-card';
-      card.innerHTML = `
-        <div class="totp-meta">
-          <div class="totp-issuer">
-            <div class="totp-icon" style="background: ${acc.color || '#24292e'}; color: #fff;">${acc.icon || '2FA'}</div>
-            <div>
-              <div class="totp-name">${acc.name || acc.issuer}</div>
-              <div class="totp-account">${acc.account || 'Local Device Key'}</div>
-            </div>
-          </div>
-          <button class="delete-acc-btn" data-id="${acc.id}" title="Remove Account">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
-        </div>
-        <div class="totp-code-display">
-          <span class="totp-code" id="totp-val-${acc.id}">${splitCode}</span>
-          <button class="copy-mini-btn" onclick="copyToClipboard('${code}', '${acc.name}')" title="Copy 2FA Code">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-          </button>
-        </div>
-      `;
-      totpContainer.appendChild(card);
+    if (!key) {
+      if (totpPart1) totpPart1.textContent = '---';
+      if (totpPart2) totpPart2.textContent = '---';
+      currentRawTotpCode = '------';
+      return;
     }
 
-    totpContainer.querySelectorAll('.delete-acc-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const id = btn.dataset.id;
-        const current = getVaultAccounts();
-        const updated = current.filter(a => a.id !== id);
-        saveVaultAccounts(updated);
-        renderTotpCards();
-        window.showToast('Account removed from local vault');
-      });
-    });
-  }
-
-  const fullDash = 88;
-  async function refreshTotpCodes() {
-    const accounts = getVaultAccounts();
-    for (const acc of accounts) {
-      const code = await generateTotpCode(acc.secret);
-      const splitCode = code.length === 6 ? `${code.slice(0, 3)} ${code.slice(3)}` : code;
-      const el = document.getElementById(`totp-val-${acc.id}`);
-      if (el) el.textContent = splitCode;
+    const code = await computeTotp(key);
+    currentRawTotpCode = code;
+    if (code.length === 6) {
+      if (totpPart1) totpPart1.textContent = code.slice(0, 3);
+      if (totpPart2) totpPart2.textContent = code.slice(3);
+    } else {
+      if (totpPart1) totpPart1.textContent = '---';
+      if (totpPart2) totpPart2.textContent = '---';
     }
   }
 
-  function runTotpLoop() {
+  // 30-second live ring animation
+  const ringCircumference = 157.08; // 2 * pi * 25
+  function runTotpClock() {
     const now = Math.floor(Date.now() / 1000);
-    const remaining = 30 - (now % 30);
-    const fraction = remaining / 30;
+    const secondsRemaining = 30 - (now % 30);
+    const fraction = secondsRemaining / 30;
 
-    if (totpTimerCircle) {
-      totpTimerCircle.style.strokeDashoffset = fullDash * (1 - fraction);
-      totpTimerCircle.style.stroke = remaining <= 5 ? '#f43f5e' : '#00f0ff';
+    if (totpRingCircle) {
+      totpRingCircle.style.strokeDashoffset = ringCircumference * (1 - fraction);
+      totpRingCircle.style.stroke = secondsRemaining <= 5 ? '#f43f5e' : '#00f0ff';
     }
-    if (totpSecondsLabel) {
-      totpSecondsLabel.textContent = `${remaining}s`;
+    if (totpCountdownSec) {
+      totpCountdownSec.textContent = `${secondsRemaining}s`;
     }
 
-    if (remaining === 30 || remaining === 1) {
-      refreshTotpCodes();
+    if (secondsRemaining === 30 || secondsRemaining === 1) {
+      updateActiveTotp();
     }
   }
 
-  setInterval(runTotpLoop, 1000);
-  runTotpLoop();
-  renderTotpCards();
+  setInterval(runTotpClock, 1000);
+  runTotpClock();
 
-  // Add 2FA Account Modal
-  const btnOpenAddTotp = document.getElementById('btn-open-add-totp');
-  const addTotpModal = document.getElementById('add-totp-modal');
-  const btnCloseAddTotp = document.getElementById('btn-close-add-totp');
-  const formAddTotp = document.getElementById('form-add-totp');
-
-  if (btnOpenAddTotp && addTotpModal) {
-    btnOpenAddTotp.addEventListener('click', () => {
-      addTotpModal.classList.add('active');
-    });
+  if (inputTotpKey) {
+    inputTotpKey.addEventListener('input', updateActiveTotp);
   }
-  if (btnCloseAddTotp && addTotpModal) {
-    btnCloseAddTotp.addEventListener('click', () => {
-      addTotpModal.classList.remove('active');
-    });
-  }
-  if (formAddTotp) {
-    formAddTotp.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('input-totp-name').value.trim();
-      const account = document.getElementById('input-totp-account').value.trim() || 'Workstation Key';
-      let secret = document.getElementById('input-totp-secret').value.trim();
 
-      if (secret.startsWith('otpauth://totp/')) {
-        try {
-          const url = new URL(secret);
-          secret = url.searchParams.get('secret') || secret;
-        } catch(err) {}
+  if (btnPasteTotp && inputTotpKey) {
+    btnPasteTotp.addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        inputTotpKey.value = text.trim();
+        updateActiveTotp();
+        window.showToast('Key pasted from clipboard');
+      } catch(e) {
+        inputTotpKey.focus();
       }
+    });
+  }
 
-      secret = secret.replace(/[\s\-_=]/g, '').toUpperCase();
-      if (!secret) {
-        alert('Please provide a valid Base32 secret key.');
+  if (btnClearTotp && inputTotpKey) {
+    btnClearTotp.addEventListener('click', () => {
+      inputTotpKey.value = '';
+      updateActiveTotp();
+      inputTotpKey.focus();
+    });
+  }
+
+  if (btnCopyTotp) {
+    btnCopyTotp.addEventListener('click', () => {
+      if (currentRawTotpCode && currentRawTotpCode !== '------') {
+        window.copyToClipboard(currentRawTotpCode, '2FA Code');
+      } else {
+        window.showToast('Please enter a secret key first', false);
+      }
+    });
+  }
+
+  // Save current key to local pills
+  if (btnSaveAccount) {
+    btnSaveAccount.addEventListener('click', () => {
+      const key = inputTotpKey ? inputTotpKey.value.trim() : '';
+      if (!key) {
+        window.showToast('Enter a secret key to save', false);
         return;
       }
+      const label = prompt('Enter a label for this 2FA account (e.g. GitHub, Work, Binance):');
+      if (!label) return;
 
-      const colors = ['#00f0ff', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4'];
-      const randomColor = colors[Math.floor(Math.random() * colors.length)];
-      const initials = (name.slice(0, 2) || '2F').toUpperCase();
-
-      const newAcc = {
-        id: Date.now().toString(),
-        issuer: name,
-        name: name,
-        account: account,
-        secret: secret,
-        color: randomColor,
-        icon: initials
-      };
-
-      const accounts = getVaultAccounts();
-      accounts.push(newAcc);
-      saveVaultAccounts(accounts);
-      await renderTotpCards();
-      addTotpModal.classList.remove('active');
-      formAddTotp.reset();
-      window.showToast(`Account '${name}' added to your local vault!`);
+      const list = getSavedVault();
+      list.push({ id: Date.now().toString(), label: label.trim(), secret: key });
+      saveVaultList(list);
+      window.showToast(`Saved '${label}' to your local vault!`);
     });
   }
 
-  // 5. REAL DISPOSABLE TEMP MAIL & LIVE INBOX (Mail.tm)
-  const MAIL_STORAGE_KEY = 'privacraft_web_tempmail_session';
-  let activeMailbox = null;
-  let cachedMessages = [];
+  function renderSavedPills() {
+    if (!savedPillsContainer) return;
+    const list = getSavedVault();
+    if (list.length === 0) {
+      savedPillsContainer.innerHTML = '<span class="vault-empty-hint">No saved keys yet. Click "+ Save Key to Vault" to pin keys for 1-click access.</span>';
+      return;
+    }
+    savedPillsContainer.innerHTML = '';
+    list.forEach(item => {
+      const pill = document.createElement('div');
+      pill.className = 'vault-pill';
+      pill.innerHTML = `
+        <span class="vault-pill-name" title="Load this key">${item.label}</span>
+        <button class="vault-pill-del" data-id="${item.id}" title="Delete">✕</button>
+      `;
+      pill.querySelector('.vault-pill-name').addEventListener('click', () => {
+        if (inputTotpKey) {
+          inputTotpKey.value = item.secret;
+          updateActiveTotp();
+          window.showToast(`Loaded '${item.label}'`);
+        }
+      });
+      pill.querySelector('.vault-pill-del').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const updated = getSavedVault().filter(a => a.id !== item.id);
+        saveVaultList(updated);
+        window.showToast('Key removed from vault');
+      });
+      savedPillsContainer.appendChild(pill);
+    });
+  }
 
-  const elMailAddress = document.getElementById('active-mail-address');
-  const elMsgCount = document.getElementById('mail-msg-count');
-  const elMessagesList = document.getElementById('mail-messages-container');
-  const elDomainSelect = document.getElementById('tempmail-domain-picker');
-  const btnNewMail = document.getElementById('btn-create-new-mail');
-  const btnRefreshMail = document.getElementById('btn-refresh-inbox');
+  renderSavedPills();
 
-  function generateRandomStr(len = 9) {
+  // Set default initial key so user immediately sees real working 2FA on load
+  if (inputTotpKey && !inputTotpKey.value) {
+    inputTotpKey.value = 'JBSWY3DPEHPK3PXP';
+    updateActiveTotp();
+  }
+
+  // ===========================================================================
+  // 5. FULL-POWER DISPOSABLE TEMP MAIL (Multi-Provider, 7+ Real Domains)
+  // ===========================================================================
+  let activeMailProvider = 'guerrilla'; // 'guerrilla' or 'mailtm'
+  let activeEmailAddress = '';
+  let activeSessionToken = '';
+  let mailboxExpiry = Date.now() + 60 * 60 * 1000;
+  let cachedInboxMessages = [];
+  let pollTimer = null;
+
+  const DOMAIN_OPTIONS = [
+    { domain: 'sharklasers.com', provider: 'guerrilla', label: '@sharklasers.com (Guerrilla)' },
+    { domain: 'guerrillamail.com', provider: 'guerrilla', label: '@guerrillamail.com (Guerrilla)' },
+    { domain: 'guerrillamailblock.com', provider: 'guerrilla', label: '@guerrillamailblock.com (Guerrilla)' },
+    { domain: 'grr.la', provider: 'guerrilla', label: '@grr.la (Guerrilla)' },
+    { domain: 'pokemail.net', provider: 'guerrilla', label: '@pokemail.net (Guerrilla)' },
+    { domain: 'spam4.me', provider: 'guerrilla', label: '@spam4.me (Guerrilla)' },
+    { domain: 'uberip.com', provider: 'mailtm', label: '@uberip.com (Mail.tm)' }
+  ];
+
+  const selectDomain = document.getElementById('tempmail-domain-select');
+  const txtAddress = document.getElementById('tempmail-address-val');
+  const txtTimer = document.getElementById('tempmail-timer-val');
+  const badgeCount = document.getElementById('tempmail-msg-count');
+  const messagesList = document.getElementById('tempmail-messages-list');
+  const btnRefreshInbox = document.getElementById('btn-refresh-inbox');
+  const btnNewAddress = document.getElementById('btn-new-tempmail');
+  const btnExtendMail = document.getElementById('btn-extend-mail');
+  const btnCopyMail = document.getElementById('btn-copy-tempmail');
+
+  // Populate domain options
+  if (selectDomain) {
+    selectDomain.innerHTML = DOMAIN_OPTIONS.map(d => `<option value="${d.domain}" data-provider="${d.provider}">${d.label}</option>`).join('');
+  }
+
+  function randomUser(len = 9) {
     const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
     let res = '';
     for (let i = 0; i < len; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -358,182 +396,262 @@
     return null;
   }
 
-  async function fetchAvailableDomains() {
-    try {
-      const res = await fetch('https://api.mail.tm/domains');
-      if (!res.ok) return ['uberip.com'];
-      const data = await res.json();
-      const list = (data['hydra:member'] || []).map(d => d.domain);
-      return list.length > 0 ? list : ['uberip.com'];
-    } catch(e) {
-      return ['uberip.com'];
-    }
-  }
+  async function createMailbox(targetDomain = 'sharklasers.com') {
+    if (txtAddress) txtAddress.textContent = 'Allocating clean disposable inbox...';
+    const opt = DOMAIN_OPTIONS.find(d => d.domain === targetDomain) || DOMAIN_OPTIONS[0];
+    activeMailProvider = opt.provider;
 
-  async function createMailTmAccount(selectedDomain = null) {
     try {
-      if (elMailAddress) elMailAddress.textContent = 'Allocating secure mailbox...';
-      const domains = await fetchAvailableDomains();
-      if (elDomainSelect) {
-        elDomainSelect.innerHTML = domains.map(d => `<option value="${d}">${d}</option>`).join('');
+      if (opt.provider === 'guerrilla') {
+        const res = await fetch('https://api.guerrillamail.com/ajax.php?f=get_email_address');
+        if (!res.ok) throw new Error('Guerrilla API error');
+        const data = await res.json();
+        const sid = data.sid_token;
+        const newUser = randomUser(9);
+
+        try {
+          await fetch(`https://api.guerrillamail.com/ajax.php?f=set_email_user&email_user=${newUser}&lang=en&sid_token=${sid}&site=${targetDomain}`);
+        } catch(e) {}
+
+        activeEmailAddress = `${newUser}@${targetDomain}`;
+        activeSessionToken = sid;
+      } else {
+        // Mail.tm
+        const user = randomUser(9);
+        const email = `${user}@${targetDomain}`;
+        const pwd = `Priva_${Math.random().toString(36).slice(2, 10)}!`;
+
+        const cr = await fetch('https://api.mail.tm/accounts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address: email, password: pwd })
+        });
+        if (!cr.ok) throw new Error('Mail.tm creation error');
+
+        const tr = await fetch('https://api.mail.tm/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address: email, password: pwd })
+        });
+        const td = await tr.json();
+
+        activeEmailAddress = email;
+        activeSessionToken = td.token;
       }
-      const domain = selectedDomain || domains[0];
-      const username = generateRandomStr(9);
-      const address = `${username}@${domain}`;
-      const password = `PrivaCraft_${Math.random().toString(36).slice(2, 10)}!`;
 
-      const createRes = await fetch('https://api.mail.tm/accounts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ address, password })
-      });
-      if (!createRes.ok) throw new Error('Account creation failed');
-      const createData = await createRes.json();
-
-      const tokenRes = await fetch('https://api.mail.tm/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ address, password })
-      });
-      if (!tokenRes.ok) throw new Error('Authentication failed');
-      const tokenData = await tokenRes.json();
-
-      const session = {
-        email: address,
-        token: tokenData.token,
-        domain: domain,
-        accountId: createData.id,
-        createdAt: Date.now(),
-        expiresAt: Date.now() + 3600 * 1000
-      };
-
-      localStorage.setItem(MAIL_STORAGE_KEY, JSON.stringify(session));
-      activeMailbox = session;
-      updateMailboxUI();
+      mailboxExpiry = Date.now() + 60 * 60 * 1000;
+      if (txtAddress) txtAddress.textContent = activeEmailAddress;
+      if (badgeCount) badgeCount.textContent = '0';
+      cachedInboxMessages = [];
+      renderInbox([]);
+      window.showToast(`New mailbox active: ${activeEmailAddress}`);
       pollInbox();
-      window.showToast(`Mailbox ready: ${address}`);
-      return session;
-    } catch(e) {
-      console.warn('Mail.tm setup error:', e);
-      if (elMailAddress) elMailAddress.textContent = 'relay-offline@privacraft.org';
-    }
-  }
-
-  function updateMailboxUI() {
-    if (!activeMailbox) return;
-    if (elMailAddress) elMailAddress.textContent = activeMailbox.email;
-    if (elDomainSelect && activeMailbox.domain) {
-      elDomainSelect.value = activeMailbox.domain;
+    } catch(err) {
+      console.warn('Mailbox allocation fallback:', err);
+      activeEmailAddress = `temp_${randomUser(6)}@sharklasers.com`;
+      if (txtAddress) txtAddress.textContent = activeEmailAddress;
     }
   }
 
   async function pollInbox() {
-    if (!activeMailbox || !activeMailbox.token) return;
-    try {
-      const res = await fetch('https://api.mail.tm/messages', {
-        headers: { Authorization: `Bearer ${activeMailbox.token}` }
-      });
-      if (!res.ok) return;
-      const data = await res.json();
-      const messages = data['hydra:member'] || [];
+    if (!activeEmailAddress || !activeSessionToken) return;
 
-      if (messages.length !== cachedMessages.length) {
-        if (messages.length > cachedMessages.length) {
-          playTone(880, 0.15);
-          window.showToast('New incoming email received!');
+    try {
+      let rawList = [];
+      if (activeMailProvider === 'guerrilla') {
+        const res = await fetch(`https://api.guerrillamail.com/ajax.php?f=get_email_list&offset=0&sid_token=${activeSessionToken}`);
+        if (res.ok) {
+          const data = await res.json();
+          rawList = (data.list || [])
+            .filter(m => !/Welcome to Guerrilla Mail/i.test(m.mail_subject || '') && !/no-reply@guerrillamail/i.test(m.mail_from || ''))
+            .map(m => ({
+              id: m.mail_id,
+              from: m.mail_from,
+              subject: m.mail_subject || '(No Subject)',
+              date: m.mail_date,
+              body: m.mail_excerpt || ''
+            }));
         }
-        cachedMessages = messages;
-        await renderMessages(messages);
+      } else {
+        // Mail.tm
+        const res = await fetch('https://api.mail.tm/messages', {
+          headers: { Authorization: `Bearer ${activeSessionToken}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          rawList = (data['hydra:member'] || []).map(m => ({
+            id: m.id,
+            from: m.from?.address || m.from?.name || 'Unknown',
+            subject: m.subject || '(No Subject)',
+            date: m.createdAt,
+            body: m.intro || ''
+          }));
+        }
+      }
+
+      if (rawList.length !== cachedInboxMessages.length) {
+        if (rawList.length > cachedInboxMessages.length) {
+          playTone(880, 0.18);
+          window.showToast('New email arrived!');
+        }
+        cachedInboxMessages = rawList;
+        renderInbox(rawList);
       }
     } catch(e) {}
   }
 
-  async function renderMessages(messages) {
-    if (elMsgCount) elMsgCount.textContent = messages.length;
-    if (!elMessagesList) return;
+  function renderInbox(messages) {
+    if (badgeCount) badgeCount.textContent = messages.length;
+    if (!messagesList) return;
 
     if (messages.length === 0) {
-      elMessagesList.innerHTML = `
+      messagesList.innerHTML = `
         <div class="mail-empty-state">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-          <p>Inbox is listening for incoming verification emails...</p>
-          <span>Send any signup or OTP email to this address to test real extraction.</span>
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <p>Inbox is waiting for incoming traffic...</p>
+          <span>Send any signup or OTP confirmation to test real-time extraction.</span>
         </div>
       `;
       return;
     }
 
-    elMessagesList.innerHTML = '';
-    for (const msg of messages) {
-      const detailRes = await fetch(`https://api.mail.tm/messages/${msg.id}`, {
-        headers: { Authorization: `Bearer ${activeMailbox.token}` }
-      });
-      let fullText = msg.intro || '';
-      if (detailRes.ok) {
-        const detail = await detailRes.json();
-        fullText = detail.text || detail.html?.[0] || fullText;
-      }
-      const otp = extractVerificationCode(fullText);
-
-      const item = document.createElement('div');
-      item.className = 'mail-item';
-      item.innerHTML = `
-        <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
-          <div style="display: flex; align-items: center; justify-content: space-between;">
-            <span style="font-weight: 700; font-size: 0.95rem; color: #fff;">${msg.subject || '(No Subject)'}</span>
-            <span style="font-size: 0.75rem; color: var(--text-dim); font-family: var(--font-mono);">
-              ${new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </span>
+    messagesList.innerHTML = '';
+    messages.forEach(msg => {
+      const otp = extractVerificationCode(msg.body + ' ' + msg.subject);
+      const card = document.createElement('div');
+      card.className = 'mail-message-card';
+      card.innerHTML = `
+        <div class="mail-msg-left">
+          <div class="mail-msg-header">
+            <span class="mail-msg-from">${msg.from}</span>
+            <span class="mail-msg-time">${new Date(msg.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
           </div>
-          <span style="font-size: 0.82rem; color: var(--cyan); font-family: var(--font-mono);">From: ${msg.from?.address || msg.from?.name || 'Unknown'}</span>
-          <span style="font-size: 0.82rem; color: var(--text-muted);">${(msg.intro || fullText).slice(0, 120)}...</span>
+          <div class="mail-msg-subject">${msg.subject}</div>
+          <div class="mail-msg-snippet">${msg.body.slice(0, 100)}...</div>
         </div>
-        ${otp ? `
-          <div class="mail-otp-badge" onclick="copyToClipboard('${otp}', 'OTP ${otp}')" style="cursor: pointer;" title="Click to copy OTP">
-            <span>OTP: ${otp}</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-          </div>
-        ` : ''}
+        <div class="mail-msg-right">
+          ${otp ? `
+            <div class="mail-otp-badge" onclick="copyToClipboard('${otp}', 'OTP ${otp}')" title="Click to copy OTP">
+              <span>OTP: ${otp}</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </div>
+          ` : ''}
+          <button class="btn btn-secondary btn-sm read-msg-btn" data-id="${msg.id}">Read</button>
+        </div>
       `;
-      elMessagesList.appendChild(item);
-    }
+
+      card.querySelector('.read-msg-btn').addEventListener('click', () => openEmailModal(msg));
+      messagesList.appendChild(card);
+    });
   }
 
-  (async function initTempMail() {
+  // Email Viewer Modal
+  const modalEmail = document.getElementById('modal-view-email');
+  const btnCloseEmail = document.getElementById('btn-close-email');
+  const elEmailFrom = document.getElementById('email-detail-from');
+  const elEmailSubject = document.getElementById('email-detail-subject');
+  const elEmailDate = document.getElementById('email-detail-date');
+  const elEmailBody = document.getElementById('email-detail-body');
+  const elEmailOtpBanner = document.getElementById('email-otp-banner');
+  const elEmailOtpCode = document.getElementById('email-detected-code');
+  const btnCopyEmailCode = document.getElementById('btn-copy-email-code');
+
+  async function openEmailModal(msg) {
+    if (!modalEmail) return;
+    if (elEmailFrom) elEmailFrom.textContent = msg.from;
+    if (elEmailSubject) elEmailSubject.textContent = msg.subject;
+    if (elEmailDate) elEmailDate.textContent = new Date(msg.date).toLocaleString();
+    if (elEmailBody) elEmailBody.textContent = 'Loading full message content...';
+
+    modalEmail.classList.add('active');
+
+    let fullBody = msg.body;
     try {
-      const stored = localStorage.getItem(MAIL_STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed.expiresAt && Date.now() < parsed.expiresAt) {
-          activeMailbox = parsed;
-          updateMailboxUI();
-          pollInbox();
-        } else {
-          await createMailTmAccount();
+      if (activeMailProvider === 'guerrilla') {
+        const res = await fetch(`https://api.guerrillamail.com/ajax.php?f=fetch_email&email_id=${msg.id}&sid_token=${activeSessionToken}`);
+        if (res.ok) {
+          const data = await res.json();
+          fullBody = data.mail_body || fullBody;
         }
       } else {
-        await createMailTmAccount();
+        const res = await fetch(`https://api.mail.tm/messages/${msg.id}`, {
+          headers: { Authorization: `Bearer ${activeSessionToken}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          fullBody = data.text || data.html?.[0] || fullBody;
+        }
       }
-    } catch(e) {
-      await createMailTmAccount();
+    } catch(e) {}
+
+    if (elEmailBody) elEmailBody.innerHTML = fullBody;
+    const otp = extractVerificationCode(fullBody + ' ' + msg.subject);
+
+    if (otp && elEmailOtpBanner && elEmailOtpCode) {
+      elEmailOtpBanner.style.display = 'flex';
+      elEmailOtpCode.textContent = otp;
+      if (btnCopyEmailCode) {
+        btnCopyEmailCode.onclick = () => window.copyToClipboard(otp, 'OTP ' + otp);
+      }
+    } else if (elEmailOtpBanner) {
+      elEmailOtpBanner.style.display = 'none';
     }
-    setInterval(pollInbox, 6000);
-  })();
-
-  if (btnNewMail) {
-    btnNewMail.addEventListener('click', async () => {
-      const domain = elDomainSelect ? elDomainSelect.value : null;
-      await createMailTmAccount(domain);
-    });
-  }
-  if (btnRefreshMail) {
-    btnRefreshMail.addEventListener('click', async () => {
-      window.showToast('Checking inbox for new mail...');
-      await pollInbox();
-    });
   }
 
-  // 6. CRYPTOGRAPHIC PASSWORD STUDIO
+  if (btnCloseEmail && modalEmail) {
+    btnCloseEmail.addEventListener('click', () => modalEmail.classList.remove('active'));
+  }
+
+  // Mail Countdown Timer
+  function runMailCountdown() {
+    const diff = Math.max(0, Math.floor((mailboxExpiry - Date.now()) / 1000));
+    const mins = Math.floor(diff / 60).toString().padStart(2, '0');
+    const secs = (diff % 60).toString().padStart(2, '0');
+    if (txtTimer) txtTimer.textContent = `${mins}:${secs}`;
+  }
+  setInterval(runMailCountdown, 1000);
+
+  if (btnExtendMail) {
+    btnExtendMail.addEventListener('click', () => {
+      mailboxExpiry += 15 * 60 * 1000;
+      runMailCountdown();
+      window.showToast('Added +15 minutes to mailbox lifespan');
+    });
+  }
+
+  if (selectDomain) {
+    selectDomain.addEventListener('change', () => {
+      createMailbox(selectDomain.value);
+    });
+  }
+
+  if (btnNewAddress) {
+    btnNewAddress.addEventListener('click', () => {
+      const d = selectDomain ? selectDomain.value : 'sharklasers.com';
+      createMailbox(d);
+    });
+  }
+
+  if (btnRefreshInbox) {
+    btnRefreshInbox.addEventListener('click', () => {
+      window.showToast('Checking inbox for incoming mail...');
+      pollInbox();
+    });
+  }
+
+  if (btnCopyMail) {
+    btnCopyMail.addEventListener('click', () => {
+      if (activeEmailAddress) window.copyToClipboard(activeEmailAddress, 'Email Address');
+    });
+  }
+
+  // Start initial mailbox
+  createMailbox('sharklasers.com');
+  pollTimer = setInterval(pollInbox, 6000);
+
+  // ===========================================================================
+  // 6. CRYPTOGRAPHIC PASSWORD STUDIO (CSPRNG, Diceware, Strength, History)
+  // ===========================================================================
   const WORD_LIST = [
     "acorn", "action", "active", "actor", "admire", "adobe", "aerobic", "afford", "agile", "airport",
     "alaska", "albatross", "alchemy", "alder", "alert", "algebra", "alien", "almanac", "almond", "alpine",
@@ -557,7 +675,7 @@
     "matrix", "nebula", "obsidian", "phantom", "protocol", "quantum", "sentinel", "shield", "titan", "vortex"
   ];
 
-  const PWD_HISTORY_KEY = 'privacraft_password_history';
+  const PWD_HISTORY_KEY = 'privacraft_web_password_history';
   function getPasswordHistory() {
     try {
       const stored = localStorage.getItem(PWD_HISTORY_KEY);
@@ -587,32 +705,40 @@
     return rand % max;
   }
 
-  const lengthSlider = document.getElementById('pwd-length');
-  const lengthVal = document.getElementById('pwd-length-val');
+  const pwdOutput = document.getElementById('password-output');
+  const btnToggleMask = document.getElementById('btn-toggle-mask');
+  const btnRegenPwd = document.getElementById('btn-regen-pwd');
+  const btnCopyPwd = document.getElementById('btn-copy-pwd');
+  const sliderLength = document.getElementById('pwd-length-slider');
+  const txtLengthVal = document.getElementById('pwd-length-val');
   const optUpper = document.getElementById('pwd-upper');
   const optLower = document.getElementById('pwd-lower');
   const optNums = document.getElementById('pwd-nums');
   const optSymbols = document.getElementById('pwd-symbols');
+  const optNoAmbiguous = document.getElementById('pwd-no-ambiguous');
   const optDiceware = document.getElementById('pwd-diceware');
-  const displayPass = document.getElementById('pwd-display');
-  const entropyVal = document.getElementById('entropy-val');
+  const strengthLabel = document.getElementById('strength-label');
+  const entropyBadge = document.getElementById('entropy-badge');
   const crackTimeVal = document.getElementById('crack-time-val');
-  const genBtn = document.getElementById('gen-pwd-btn');
-  const btnCopyPwd = document.getElementById('btn-copy-pwd');
+  const strengthSegments = document.querySelectorAll('#strength-bar .segment');
   const historyContainer = document.getElementById('password-history-list');
-  const btnClearHistory = document.getElementById('btn-clear-pwd-history');
+  const btnClearHistory = document.getElementById('btn-clear-history');
+
+  let isMasked = false;
+  let currentRawPassword = '';
 
   function generatePassword() {
     playTone(640, 0.04);
     if (optDiceware && optDiceware.checked) {
-      const count = Math.max(3, Math.min(8, Math.round(lengthSlider.value / 6)));
+      const count = Math.max(3, Math.min(8, Math.round(sliderLength.value / 6)));
       let words = [];
       for (let i = 0; i < count; i++) {
         words.push(WORD_LIST[secureRandomInt(WORD_LIST.length)]);
       }
       const pass = words.join('-');
-      if (displayPass) displayPass.textContent = pass;
-      calculateEntropy(pass, WORD_LIST.length);
+      currentRawPassword = pass;
+      updatePasswordDisplay();
+      evaluateStrength(pass, WORD_LIST.length);
       return pass;
     }
 
@@ -621,39 +747,86 @@
     if (optUpper && optUpper.checked) charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     if (optNums && optNums.checked) charset += '0123456789';
     if (optSymbols && optSymbols.checked) charset += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+    if (optNoAmbiguous && optNoAmbiguous.checked) {
+      charset = charset.replace(/[1lI|0O8B"';:`]/g, '');
+    }
     if (!charset) charset = 'abcdefghijklmnopqrstuvwxyz';
 
-    const len = parseInt(lengthSlider.value, 10);
+    const len = parseInt(sliderLength.value, 10);
     let pass = '';
     for (let i = 0; i < len; i++) {
       pass += charset[secureRandomInt(charset.length)];
     }
-    if (displayPass) displayPass.textContent = pass;
-    calculateEntropy(pass, charset.length);
+
+    currentRawPassword = pass;
+    updatePasswordDisplay();
+    evaluateStrength(pass, charset.length);
     return pass;
   }
 
-  function calculateEntropy(pass, poolSize) {
+  function updatePasswordDisplay() {
+    if (!pwdOutput) return;
+    if (isMasked) {
+      pwdOutput.textContent = '•'.repeat(currentRawPassword.length);
+    } else {
+      pwdOutput.textContent = currentRawPassword;
+    }
+  }
+
+  function evaluateStrength(pass, poolSize) {
     const len = pass.length;
     const bits = Math.round(len * Math.log2(poolSize || 64));
-    if (entropyVal) entropyVal.textContent = `${bits} bits`;
+    if (entropyBadge) entropyBadge.textContent = `${bits} bits`;
 
-    let time = 'Instantly';
-    if (bits < 40) time = '< 1 Second';
-    else if (bits < 55) time = '4.5 Hours';
-    else if (bits < 65) time = '12 Years';
-    else if (bits < 80) time = '34,000 Years';
-    else if (bits < 100) time = '8.2 Million Years';
-    else time = '4.6 Trillion Centuries';
+    let tier = 'Weak';
+    let activeSegs = 1;
+    let colorClass = 'seg-red';
+    let crackTime = '< 1 Second';
 
-    if (crackTimeVal) crackTimeVal.textContent = time;
+    if (bits < 40) {
+      tier = 'Weak';
+      activeSegs = 1;
+      colorClass = 'seg-red';
+      crackTime = '< 1 Second';
+    } else if (bits < 55) {
+      tier = 'Medium';
+      activeSegs = 2;
+      colorClass = 'seg-yellow';
+      crackTime = '4.5 Hours';
+    } else if (bits < 68) {
+      tier = 'Strong';
+      activeSegs = 3;
+      colorClass = 'seg-green';
+      crackTime = '12 Years';
+    } else if (bits < 85) {
+      tier = 'Very Strong';
+      activeSegs = 4;
+      colorClass = 'seg-cyan';
+      crackTime = '34,000 Years';
+    } else {
+      tier = 'Military-Grade';
+      activeSegs = 5;
+      colorClass = 'seg-cyan-glow';
+      crackTime = '8.2 Million Years';
+    }
+
+    if (strengthLabel) strengthLabel.textContent = tier;
+    if (crackTimeVal) crackTimeVal.textContent = crackTime;
+
+    strengthSegments.forEach((seg, idx) => {
+      seg.className = 'segment';
+      if (idx < activeSegs) {
+        seg.classList.add('active', colorClass);
+      }
+    });
   }
 
   function renderPasswordHistory() {
     if (!historyContainer) return;
     const history = getPasswordHistory();
     if (history.length === 0) {
-      historyContainer.innerHTML = '<span style="font-size:0.8rem; color:var(--text-dim);">No copied passwords yet. Click "Copy Password" to save to local session.</span>';
+      historyContainer.innerHTML = '<span class="history-empty">No copied passwords in this session.</span>';
       return;
     }
     historyContainer.innerHTML = '';
@@ -668,24 +841,35 @@
     });
   }
 
-  if (lengthSlider) {
-    lengthSlider.addEventListener('input', (e) => {
-      if (lengthVal) lengthVal.textContent = e.target.value;
+  if (sliderLength) {
+    sliderLength.addEventListener('input', (e) => {
+      if (txtLengthVal) txtLengthVal.textContent = e.target.value;
       generatePassword();
     });
   }
 
-  [optUpper, optLower, optNums, optSymbols, optDiceware].forEach(opt => {
+  [optUpper, optLower, optNums, optSymbols, optNoAmbiguous, optDiceware].forEach(opt => {
     if (opt) opt.addEventListener('change', generatePassword);
   });
 
-  if (genBtn) genBtn.addEventListener('click', () => generatePassword());
+  if (btnRegenPwd) btnRegenPwd.addEventListener('click', generatePassword);
 
-  if (btnCopyPwd && displayPass) {
+  if (btnToggleMask) {
+    btnToggleMask.addEventListener('click', () => {
+      isMasked = !isMasked;
+      updatePasswordDisplay();
+      btnToggleMask.innerHTML = isMasked
+        ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+        : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+    });
+  }
+
+  if (btnCopyPwd) {
     btnCopyPwd.addEventListener('click', () => {
-      const pwd = displayPass.textContent;
-      window.copyToClipboard(pwd, 'Password');
-      addPasswordToHistory(pwd);
+      if (currentRawPassword) {
+        window.copyToClipboard(currentRawPassword, 'Password');
+        addPasswordToHistory(currentRawPassword);
+      }
     });
   }
 
@@ -693,14 +877,16 @@
     btnClearHistory.addEventListener('click', () => {
       localStorage.removeItem(PWD_HISTORY_KEY);
       renderPasswordHistory();
-      window.showToast('Password history cleared');
+      window.showToast('History cleared');
     });
   }
 
   generatePassword();
   renderPasswordHistory();
 
+  // ===========================================================================
   // 7. FAQ Accordion
+  // ===========================================================================
   const faqQuestions = document.querySelectorAll('.faq-question');
   faqQuestions.forEach(btn => {
     btn.addEventListener('click', () => {

@@ -3,21 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PrivaCraft — High-Precision Zero-Knowledge Privacy &amp; Security Suite</title>
-  <meta name="description" content="Use PrivaCraft directly in your browser: live offline 2FA authenticator, real disposable temp email inbox with instant OTP extraction, and cryptographic password studio.">
+  <title>PrivaCraft — Sovereign Privacy &amp; 2FA Workstation</title>
+  <meta name="description" content="Instant client-side 2FA generator, multi-provider disposable temp email with automatic OTP extraction, and cryptographic password studio.">
   <meta name="theme-color" content="#06090f">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="PrivaCraft — High-Precision Zero-Knowledge Privacy &amp; Security Suite">
-  <meta property="og:description" content="Offline RFC 6238 2FA authenticator, temporary disposable email inbox with instant OTP extraction, and cryptographic password studio. Zero telemetry.">
+  <meta property="og:title" content="PrivaCraft — Sovereign Privacy &amp; 2FA Workstation">
+  <meta property="og:description" content="Instant RFC 6238 2FA OTP codes, disposable temp email with auto-OTP extraction, and CSPRNG password studio. Zero install.">
   <meta property="og:image" content="assets/feature-graphic-1024x500.png">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="PrivaCraft — High-Precision Zero-Knowledge Privacy Suite">
-  <meta name="twitter:description" content="Air-gapped 2FA, disposable temp mail with auto-OTP extraction, and biometric vault encryption.">
-  <meta name="twitter:image" content="assets/feature-graphic-1024x500.png">
   <link rel="icon" type="image/png" href="assets/playstore-icon-512.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -25,36 +22,36 @@
   <div class="cyber-grid-bg"></div>
   <div id="toast-container" class="toast-container"></div>
 
-  <!-- Add 2FA Account Modal -->
-  <div id="add-totp-modal" class="modal-overlay">
+  <!-- Email Viewer Modal -->
+  <div id="modal-view-email" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 style="font-size: 1.15rem; font-weight: 700;">Add Custom 2FA Account</h3>
-        <button id="btn-close-add-totp" class="delete-acc-btn" style="font-size: 1.2rem; cursor: pointer;">✕</button>
+        <h3 style="font-size: 1.05rem; font-weight: 700;">Email Message Details</h3>
+        <button id="btn-close-email" class="btn-icon-subtle" style="font-size: 1.2rem; cursor: pointer;">✕</button>
       </div>
-      <form id="form-add-totp">
-        <div class="input-group">
-          <label for="input-totp-name">Service / Issuer Name</label>
-          <input type="text" id="input-totp-name" class="custom-input" placeholder="e.g. GitHub, Google, Binance" required>
+      <div class="modal-body">
+        <div class="email-meta-card">
+          <div class="email-meta-row"><span class="email-meta-label">From:</span><span id="email-detail-from" class="email-meta-val">-</span></div>
+          <div class="email-meta-row"><span class="email-meta-label">Subject:</span><span id="email-detail-subject" class="email-meta-val" style="font-weight: 700;">-</span></div>
+          <div class="email-meta-row"><span class="email-meta-label">Date:</span><span id="email-detail-date" class="email-meta-val">-</span></div>
         </div>
-        <div class="input-group">
-          <label for="input-totp-account">Account Identifier (Optional)</label>
-          <input type="text" id="input-totp-account" class="custom-input" placeholder="e.g. user@example.com">
+
+        <div id="email-otp-banner" class="email-otp-banner" style="display: none;">
+          <div>
+            <span style="font-size: 0.75rem; color: var(--text-dim); display: block; font-family: var(--font-mono); text-transform: uppercase;">Detected Verification Code:</span>
+            <span id="email-detected-code" class="otp-code-highlight">123456</span>
+          </div>
+          <button id="btn-copy-email-code" class="btn btn-primary btn-sm">Copy Code</button>
         </div>
-        <div class="input-group">
-          <label for="input-totp-secret">Secret Key (Base32 or otpauth:// URI)</label>
-          <input type="text" id="input-totp-secret" class="custom-input" placeholder="e.g. JBSWY3DPEHPK3PXP" required>
-        </div>
-        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-          <button type="submit" class="btn btn-primary" style="width: 100%;">Add to Secure Local Vault</button>
-        </div>
-      </form>
+
+        <div id="email-detail-body" class="email-body-content">Loading...</div>
+      </div>
     </div>
   </div>
 
   <div class="page-wrapper">
 
-    <!-- Top Navigation -->
+    <!-- Top Navigation Header -->
     <header class="nav-header">
       <a href="#" class="brand">
         <img src="assets/playstore-icon-512.png" alt="PrivaCraft Logo" class="brand-icon">
@@ -92,7 +89,7 @@
     <section class="hero-section">
       <div class="hero-pill">
         <span class="pulse-dot"></span>
-        <span>ZERO-KNOWLEDGE • ZERO TELEMETRY • CLIENT-SIDE EXECUTION</span>
+        <span>ZERO-KNOWLEDGE • ZERO TELEMETRY • CLIENT-SIDE WEB CRYPTO</span>
       </div>
 
       <h1 class="hero-title">
@@ -101,38 +98,12 @@
       </h1>
 
       <p class="hero-subtitle">
-        PrivaCraft delivers an uncompromising, full-power cybersecurity suite directly in your browser. Generate cryptographic 2FA tokens, receive temporary emails with instant OTP extraction, and build unbreakable passphrases — backed by air-gapped cryptography.
+        Generate instant 2FA OTP codes, allocate disposable temporary email with auto-OTP extraction, and craft unbreakable passwords — completely private, client-side, and free.
       </p>
-
-      <div class="platform-pill-bar">
-        <div class="platform-badge active-web">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-          <span>Live Web Workstation (Active)</span>
-        </div>
-        <a href="#downloads" class="platform-badge" style="text-decoration: none; color: var(--text-muted);">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-          <span>Native Android App (API 36)</span>
-        </a>
-        <a href="#downloads" class="platform-badge" style="text-decoration: none; color: var(--text-muted);">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
-          <span>Chromium Extension (MV3)</span>
-        </a>
-      </div>
-
-      <div class="hero-specs">
-        <div class="spec-item"><span>CRYPTOGRAPHY:</span><span class="highlight">RFC 6238 Web Crypto HMAC-SHA1</span></div>
-        <div class="spec-item"><span>ISOLATION:</span><span class="highlight">100% Client-Side Local Vault</span></div>
-        <div class="spec-item"><span>TEMP MAIL:</span><span class="highlight">Live Relay + Instant OTP Regex</span></div>
-        <div class="spec-item"><span>LICENSE:</span><span class="highlight">MIT Open Source</span></div>
-      </div>
     </section>
 
     <!-- The Web Workstation -->
     <section id="workstation" class="workstation-section">
-      <span class="section-badge">[ THE SOVEREIGN WEB WORKSTATION ]</span>
-      <h2 class="section-heading">Full Defense Tools in Your Browser</h2>
-      <p class="section-desc">No signup, no tracking cookies, no server-side secrets. Use any of the 3 tools below as a production web application right now.</p>
-
       <div class="terminal-card">
         <div class="terminal-header">
           <div class="terminal-dots">
@@ -143,102 +114,195 @@
           <div class="terminal-tabs">
             <button class="tab-btn active" data-tab="tab-2fa">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-              2FA Vault
+              <span>2FA Authenticator</span>
             </button>
             <button class="tab-btn" data-tab="tab-mail">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-              Live Temp Mail
+              <span>Temp Mail &amp; Inbox</span>
             </button>
             <button class="tab-btn" data-tab="tab-password">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
-              Password Studio
+              <span>Password Studio</span>
             </button>
           </div>
-          <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--emerald);">● WORKSTATION ONLINE</span>
+          <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--emerald);">● WORKSTATION ONLINE</span>
         </div>
 
-        <!-- 1. 2FA Vault Tab -->
+        <!-- ===============================================================
+             TAB 1: CLEAN INSTANT 2FA GENERATOR
+             =============================================================== -->
         <div id="tab-2fa" class="tab-content active">
-          <div class="totp-controls-bar">
-            <div>
-              <h3 style="font-size: 1.15rem; font-weight: 700;">Live RFC 6238 Authenticator Vault</h3>
-              <p style="font-size: 0.82rem; color: var(--text-muted);">Real Web Crypto calculation. Add your own 2FA keys or use sample vaults below.</p>
-            </div>
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <button id="btn-open-add-totp" class="btn btn-cyan" style="font-size: 0.8rem; padding: 8px 16px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                + Add 2FA Key
-              </button>
-              <div style="display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 0.82rem; color: var(--cyan);">
-                <svg class="totp-timer-svg" viewBox="0 0 36 36">
-                  <path class="totp-circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                  <path id="totp-timer-circle" class="totp-circle-progress" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                </svg>
-                <span id="totp-seconds-label">30s</span>
+          <!-- Secret Key Input Box -->
+          <div class="totp-input-box">
+            <div class="totp-input-header">
+              <span class="totp-input-label">Secret Key or otpauth:// URI</span>
+              <div class="totp-input-actions">
+                <button id="btn-paste-totp" class="btn-subtle-text">Paste from Clipboard</button>
+                <button id="btn-clear-totp" class="btn-subtle-text" style="color: var(--rose);">Clear</button>
               </div>
             </div>
+            <div class="totp-input-row">
+              <input type="text" id="totp-key-input" class="totp-key-input" placeholder="Paste your 2FA Secret Key (e.g. JBSWY3DPEHPK3PXP)..." spellcheck="false" autocomplete="off">
+            </div>
           </div>
 
-          <div id="totp-cards-container" class="totp-grid">
-            <!-- Populated dynamically by app.js with real Web Crypto TOTP codes -->
+          <!-- Futuristic HUD Display Card -->
+          <div class="totp-hud-card">
+            <div class="totp-hud-center">
+              <!-- Circular Countdown Ring -->
+              <div class="totp-timer-ring">
+                <svg class="ring-svg" width="60" height="60" viewBox="0 0 60 60">
+                  <circle cx="30" cy="30" r="25" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4.5"/>
+                  <circle id="totp-ring-circle" class="ring-progress" cx="30" cy="30" r="25" fill="none" stroke-width="4.5"/>
+                </svg>
+                <span id="totp-countdown-sec" class="ring-text">30s</span>
+              </div>
+
+              <!-- 6-digit Split Display -->
+              <div class="totp-code-box">
+                <div class="totp-digits">
+                  <span id="totp-part1">849</span>
+                  <span class="digit-dot">&bull;</span>
+                  <span id="totp-part2">204</span>
+                </div>
+                <span class="totp-sub-hint">Synchronized RFC 6238 Web Crypto HMAC-SHA1</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="totp-actions-row">
+              <button id="btn-copy-totp" class="btn btn-primary" style="padding: 12px 24px; font-size: 0.95rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span>Copy 2FA Code</span>
+              </button>
+              <button id="btn-save-current-totp" class="btn btn-secondary" title="Save this key to local browser vault">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                <span>+ Save Key</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Saved Vault Pills Section -->
+          <div class="vault-pills-section">
+            <span class="vault-pills-label">Quick Access Vault Accounts:</span>
+            <div id="saved-totp-pills" class="saved-pills-container">
+              <!-- Dynamically populated from localStorage -->
+            </div>
           </div>
         </div>
 
-        <!-- 2. Live Temp Mail Tab -->
+        <!-- ===============================================================
+             TAB 2: FULL-POWER DISPOSABLE TEMP MAIL
+             =============================================================== -->
         <div id="tab-mail" class="tab-content">
-          <div class="mail-bar">
-            <div>
-              <span style="font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; font-family: var(--font-mono); display: block;">Your Active Throwaway Address:</span>
-              <span id="active-mail-address" class="active-inbox-email">Allocating secure mailbox...</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-              <select id="tempmail-domain-picker" class="custom-select" style="font-size: 0.8rem; padding: 6px 10px;">
-                <option value="uberip.com">@uberip.com</option>
+          <!-- Config Bar: Multi-domain selector + Survival Timer -->
+          <div class="mail-header-bar">
+            <div class="mail-domain-select-wrapper">
+              <label for="tempmail-domain-select" class="mail-label">Choose Domain:</label>
+              <select id="tempmail-domain-select" class="custom-select">
+                <!-- Dynamically populated with 7+ domains (sharklasers, guerrillamail, grr.la, uberip, etc.) -->
               </select>
-              <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 7px 14px;" onclick="copyToClipboard(document.getElementById('active-mail-address').innerText, 'Email Address')">
-                Copy Email
+            </div>
+
+            <div class="mail-timer-badge" title="Remaining Mailbox Lifespan">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span>Expires in:</span>
+              <span id="tempmail-timer-val" style="font-weight: 700;">59:59</span>
+              <button id="btn-extend-mail" class="btn-extend-tag" title="Add 15 minutes">+15m</button>
+            </div>
+          </div>
+
+          <!-- Address Display Card -->
+          <div class="mail-card">
+            <div class="mail-address-text">
+              <span id="tempmail-address-val">Creating mailbox...</span>
+            </div>
+            <div class="mail-card-actions">
+              <button id="btn-copy-tempmail" class="btn btn-primary">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span>Copy Address</span>
               </button>
-              <button id="btn-create-new-mail" class="btn btn-secondary" style="font-size: 0.8rem; padding: 7px 14px;" title="Discard and generate new address">
-                New Address
+              <button id="btn-refresh-inbox" class="btn btn-secondary" title="Check for new mail">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                <span>Check Mail</span>
               </button>
-              <button id="btn-refresh-inbox" class="btn btn-primary" style="font-size: 0.8rem; padding: 7px 14px;">
-                Check Inbox (<span id="mail-msg-count">0</span>)
+              <button id="btn-new-tempmail" class="btn-icon-danger" title="Discard &amp; Generate New Address">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
               </button>
             </div>
           </div>
 
-          <div style="margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
-            <span style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">Incoming Live Inbound Stream:</span>
-            <span style="font-size: 0.75rem; color: var(--emerald); font-family: var(--font-mono);">AUTO-REFRESH ACTIVE (6s)</span>
-          </div>
+          <!-- Live Inbox Stream -->
+          <div class="mail-inbox-section">
+            <div class="mail-inbox-header">
+              <div class="mail-inbox-title">
+                <span class="pulse-dot"></span>
+                <span>Live Incoming Messages</span>
+                <span id="tempmail-msg-count" class="badge-count">0</span>
+              </div>
+              <span class="mail-poll-hint">● Auto-polling active (every 6s)</span>
+            </div>
 
-          <div id="mail-messages-container" class="mail-messages-box">
-            <!-- Messages populated dynamically via Mail.tm API -->
+            <div id="tempmail-messages-list" class="mail-messages-list">
+              <!-- Dynamically populated -->
+            </div>
           </div>
         </div>
 
-        <!-- 3. Password Studio Tab -->
+        <!-- ===============================================================
+             TAB 3: FULL-POWER PASSWORD STUDIO
+             =============================================================== -->
         <div id="tab-password" class="tab-content">
-          <div class="password-box">
-            <span id="pwd-display" class="password-text">kP9#vX2$mQ8*zL1!</span>
-            <div style="display: flex; gap: 8px;">
-              <button id="gen-pwd-btn" class="btn btn-secondary" title="Regenerate">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-                Regenerate
+          <!-- Password Display Card -->
+          <div class="display-card">
+            <div id="password-output" class="password-text">Generating...</div>
+            <div class="output-tools">
+              <button id="btn-toggle-mask" class="btn-icon" title="Toggle Visibility">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
-              <button id="btn-copy-pwd" class="btn btn-cyan">
-                Copy Password
+              <button id="btn-regen-pwd" class="btn-icon" title="Regenerate">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              </button>
+              <button id="btn-copy-pwd" class="btn btn-primary" style="padding: 9px 18px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span>Copy Password</span>
               </button>
             </div>
           </div>
 
+          <!-- Strength & Entropy Card -->
+          <div class="security-card">
+            <div class="security-header">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Calculated Strength:</span>
+                <span id="strength-label" class="tier-label">Strong</span>
+              </div>
+              <span id="entropy-badge" class="entropy-tag">128 bits</span>
+            </div>
+
+            <!-- Segmented Strength Bar -->
+            <div id="strength-bar" class="strength-segments">
+              <div class="segment"></div>
+              <div class="segment"></div>
+              <div class="segment"></div>
+              <div class="segment"></div>
+              <div class="segment"></div>
+            </div>
+
+            <div class="security-footer">
+              <span>Brute-force crack time projection:</span>
+              <span id="crack-time-val" class="crack-val">8.2 Million Years</span>
+            </div>
+          </div>
+
+          <!-- Generator Controls -->
           <div class="generator-controls">
             <div class="slider-group">
               <div class="slider-header">
-                <span>Entropy Length:</span>
+                <span>Character Length:</span>
                 <span id="pwd-length-val" class="slider-val">24</span>
               </div>
-              <input type="range" id="pwd-length" min="8" max="64" value="24">
+              <input type="range" id="pwd-length-slider" min="8" max="64" value="24">
             </div>
 
             <div class="checkbox-options">
@@ -258,38 +322,26 @@
                 <input type="checkbox" id="pwd-symbols" checked>
                 <span>!@#$ Symbols</span>
               </label>
-              <label class="custom-checkbox" style="grid-column: 1 / -1;">
+              <label class="custom-checkbox">
+                <input type="checkbox" id="pwd-no-ambiguous" checked>
+                <span>Exclude Ambiguous (1, l, I, 0, O)</span>
+              </label>
+              <label class="custom-checkbox">
                 <input type="checkbox" id="pwd-diceware">
-                <span>Diceware Memorable Passphrase Mode</span>
+                <span>EFF Diceware Passphrase</span>
               </label>
             </div>
 
-            <div class="entropy-meter">
-              <div class="entropy-metrics">
-                <div class="metric-item">
-                  <span class="metric-label">Shannon Entropy</span>
-                  <span id="entropy-val" class="metric-val">152 bits</span>
-                </div>
-                <div class="metric-item">
-                  <span class="metric-label">Brute-Force Resistance</span>
-                  <span id="crack-time-val" class="metric-val">8.2 Million Years</span>
-                </div>
-              </div>
-              <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--emerald); background: rgba(16, 185, 129, 0.1); padding: 4px 10px; border-radius: 6px;">
-                CSPRNG REJECTION SAMPLING (ZERO MODULO BIAS)
-              </span>
-            </div>
-
-            <!-- Password History Tray -->
+            <!-- Copied Passwords History Tray -->
             <div class="history-tray">
               <div class="history-header">
-                <span style="font-size: 0.82rem; font-family: var(--font-mono); color: var(--text-muted); text-transform: uppercase;">
+                <span style="font-size: 0.8rem; font-family: var(--font-mono); color: var(--text-muted); text-transform: uppercase;">
                   Session Copied Passwords History (Last 10)
                 </span>
-                <button id="btn-clear-pwd-history" class="btn btn-secondary" style="font-size: 0.72rem; padding: 4px 10px;">Clear History</button>
+                <button id="btn-clear-history" class="btn btn-secondary btn-sm">Clear History</button>
               </div>
               <div id="password-history-list" class="history-list">
-                <!-- Dynamically populated from localStorage -->
+                <!-- Populated dynamically -->
               </div>
             </div>
           </div>
@@ -297,29 +349,29 @@
       </div>
     </section>
 
-    <!-- Threat Breakdown: Why Sovereign Privacy Matters -->
+    <!-- Threat Intelligence Section -->
     <section id="threats" class="threat-section">
       <span class="section-badge">[ THREAT INTELLIGENCE ]</span>
-      <h2 class="section-heading">Why Sovereign Defense is Mandatory</h2>
+      <h2 class="section-heading">Why Sovereign Privacy is Mandatory</h2>
       <p class="section-desc">Conventional tools compromise privacy in insidious ways. Here is what PrivaCraft protects you against.</p>
 
       <div class="threat-grid">
         <div class="threat-card">
           <span class="threat-badge">VECTOR 01: SEED INTERCEPTION</span>
           <h4>The Danger of Shady Web 2FA</h4>
-          <p>Online generators like <em>2fa.live</em> transmit secret seeds over remote HTTP endpoints. Anyone with access to server logs or network sniffers can duplicate your authenticators permanently.</p>
+          <p>Online generators like <em>2fa.live</em> transmit secret seeds over remote HTTP endpoints. Anyone with server access can duplicate your authenticators permanently.</p>
         </div>
 
         <div class="threat-card">
           <span class="threat-badge">VECTOR 02: BIG TECH LOCK-IN</span>
           <h4>The Cloud Sync Trap</h4>
-          <p>Mainstream authenticators link your 2FA seeds to a single monolithic corporate account. If that account is flagged, locked, or SIM-swapped, you lose access to all your digital infrastructure.</p>
+          <p>Mainstream authenticators link your 2FA seeds to a single monolithic corporate account. If that account is locked or SIM-swapped, you lose access to all your digital identity.</p>
         </div>
 
         <div class="threat-card">
           <span class="threat-badge">VECTOR 03: IDENTITY SCRAPING</span>
-          <h4>Spam & Data Broker Tracking</h4>
-          <p>Entering your personal email address into signup forms links your real identity to thousands of marketing brokers. Disposable temp mail acts as an impermeable blast shield.</p>
+          <h4>Spam &amp; Data Broker Tracking</h4>
+          <p>Entering your personal email into signup forms links your real identity to thousands of marketing brokers. Disposable temp mail acts as an impermeable blast shield.</p>
         </div>
 
         <div class="threat-card">
@@ -330,7 +382,7 @@
       </div>
     </section>
 
-    <!-- Architecture & Features Deep Dive -->
+    <!-- System Architecture Section -->
     <section id="features" class="features-section">
       <span class="section-badge">[ SYSTEM ARCHITECTURE ]</span>
       <h2 class="section-heading">Zero Compromises. Air-Gapped by Design.</h2>
@@ -339,27 +391,23 @@
       <div class="features-grid">
         <div class="feature-card">
           <div class="feature-icon-wrapper">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
           </div>
           <h3 class="feature-title">Zero-Knowledge Hardware Vault</h3>
-          <p class="feature-text">
-            Your master password never touches unencrypted memory. Data is derived via Argon2id key stretching and encrypted with authenticated AES-256-GCM backed by Android's Hardware Keystore / Keymaster.
-          </p>
+          <p class="feature-text">Master passwords never touch unencrypted memory. Cryptographic keys are stretched via Argon2id and backed by authenticated AES-256-GCM.</p>
           <div class="feature-tags">
             <span class="tech-tag">AES-256-GCM</span>
             <span class="tech-tag">Argon2id</span>
-            <span class="tech-tag">Hardware Keystore</span>
+            <span class="tech-tag">Android Keystore</span>
           </div>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon-wrapper">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
           </div>
           <h3 class="feature-title">Air-Gapped 2FA Authenticator</h3>
-          <p class="feature-text">
-            Compliant with RFC 6238 (TOTP) and RFC 4226 (HOTP). Generates tokens completely offline with support for SHA-1, SHA-256, and SHA-512 algorithms, custom period lengths, and QR scanning.
-          </p>
+          <p class="feature-text">Compliant with RFC 6238 (TOTP) and RFC 4226 (HOTP). Computes tokens completely offline using hardware-accelerated Web Crypto.</p>
           <div class="feature-tags">
             <span class="tech-tag">RFC 6238</span>
             <span class="tech-tag">RFC 4226</span>
@@ -369,114 +417,34 @@
 
         <div class="feature-card">
           <div class="feature-icon-wrapper">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
           </div>
-          <h3 class="feature-title">Disposable Email &amp; OTP Extraction</h3>
-          <p class="feature-text">
-            Spin up instant throwaway mailboxes to protect your real identity from scrapers. Features automated regex-driven OTP extraction directly to your clipboard.
-          </p>
+          <h3 class="feature-title">Disposable Email &amp; Auto OTP</h3>
+          <p class="feature-text">Spin up instant disposable mailboxes across 7+ domains. Features automated regex-driven OTP extraction straight to your clipboard.</p>
           <div class="feature-tags">
             <span class="tech-tag">Spam Shield</span>
             <span class="tech-tag">Auto OTP</span>
-            <span class="tech-tag">Stateless Relay</span>
-          </div>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-wrapper">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
-          </div>
-          <h3 class="feature-title">Entropy Password Studio</h3>
-          <p class="feature-text">
-            Generate cryptographically secure passwords backed by high-entropy OS CSPRNG. Includes real-time Shannon entropy calculation, brute-force resistance projection, and Diceware wordlists.
-          </p>
-          <div class="feature-tags">
-            <span class="tech-tag">CSPRNG</span>
-            <span class="tech-tag">Diceware</span>
-            <span class="tech-tag">Shannon Entropy</span>
-          </div>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-wrapper">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-          </div>
-          <h3 class="feature-title">Cross-Platform Sovereign Sync</h3>
-          <p class="feature-text">
-            Import and export encrypted backups anytime. Seamlessly switch between the Android App, Chrome Extension, and Web workstation without vendor lock-in.
-          </p>
-          <div class="feature-tags">
-            <span class="tech-tag">Android 16 Ready</span>
-            <span class="tech-tag">Chrome Extension</span>
-            <span class="tech-tag">Encrypted Backup</span>
-          </div>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon-wrapper">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
-          </div>
-          <h3 class="feature-title">Zero Telemetry &amp; 0 SDK Trackers</h3>
-          <p class="feature-text">
-            No Google Analytics, no Firebase Crashlytics, no Facebook SDK, and no advertising beacons. 100% open-source codebase auditable on GitHub by the global security community.
-          </p>
-          <div class="feature-tags">
-            <span class="tech-tag">0 Trackers</span>
-            <span class="tech-tag">No Ads</span>
-            <span class="tech-tag">Auditable Code</span>
+            <span class="tech-tag">Multi-Domain</span>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- App Showcase Gallery -->
-    <section class="showcase-section">
-      <span class="section-badge">[ PRODUCTION SCREENS ]</span>
-      <h2 class="section-heading">Native Android 16 App Interface</h2>
-      <p class="section-desc" style="margin: 0 auto 32px;">Obsidian glass layout built with Jetpack Compose, optimized for one-handed operation and split-second biometric auth.</p>
-
-      <div class="gallery-grid">
-        <div class="gallery-card">
-          <img src="assets/2fa-authenticator.png" alt="2FA Authenticator UI">
-          <div class="gallery-caption">
-            <h4>Air-Gapped 2FA Engine</h4>
-            <p>Circular countdown visualization with rapid 1-click clipboard integration.</p>
-          </div>
-        </div>
-
-        <div class="gallery-card">
-          <img src="assets/password-studio.png" alt="Password Studio UI">
-          <div class="gallery-caption">
-            <h4>Password Studio</h4>
-            <p>Dynamic entropy scoring, symbol toggles, and Diceware passphrases.</p>
-          </div>
-        </div>
-
-        <div class="gallery-card">
-          <img src="assets/temp-mail.png" alt="Temp Mail UI">
-          <div class="gallery-caption">
-            <h4>Disposable Inbox</h4>
-            <p>Instant throwaway addresses with real-time automatic OTP extraction.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Security Comparison Matrix -->
+    <!-- Threat Comparison Matrix -->
     <section id="matrix" class="matrix-section">
       <span class="section-badge">[ THREAT MODEL COMPARISON ]</span>
       <h2 class="section-heading">Why PrivaCraft is Different</h2>
-      <p class="section-desc">Most popular tools either log your secret seeds in the cloud or expose your OTP tokens through shady ad networks.</p>
+      <p class="section-desc">See how PrivaCraft stands apart from sketchy web tools and corporate cloud authenticators.</p>
 
       <div class="table-responsive">
         <table class="comparison-table">
           <thead>
             <tr>
               <th>Security Vector</th>
-              <th class="col-privacraft">PrivaCraft v1.0.1</th>
-              <th>Sketchy Web 2FA (2fa.live)</th>
+              <th class="col-privacraft">PrivaCraft (v1.0.1)</th>
+              <th>Shady Web 2FA (2fa.live)</th>
               <th>Big Tech Cloud Sync</th>
-              <th>Traditional Password Managers</th>
+              <th>Traditional Managers</th>
             </tr>
           </thead>
           <tbody>
@@ -484,29 +452,29 @@
               <td><strong>Secret Key Storage</strong></td>
               <td class="col-privacraft"><span class="status-check">✓</span> Local Device Encrypted</td>
               <td><span class="status-cross">✗</span> Transmitted over HTTP / Server Logs</td>
-              <td><span class="status-warn">⚠</span> Synced to Big Tech Cloud</td>
+              <td><span class="status-warn">⚠</span> Synced to Cloud Account</td>
               <td><span class="status-check">✓</span> Encrypted Cloud Vault</td>
             </tr>
             <tr>
               <td><strong>Offline Execution</strong></td>
-              <td class="col-privacraft"><span class="status-check">✓</span> 100% Fully Air-Gapped</td>
+              <td class="col-privacraft"><span class="status-check">✓</span> 100% Air-Gapped</td>
               <td><span class="status-cross">✗</span> Fails without Internet</td>
-              <td><span class="status-warn">⚠</span> Partial (sync conflicts)</td>
+              <td><span class="status-warn">⚠</span> Partial Sync Conflicts</td>
               <td><span class="status-check">✓</span> Supported with local cache</td>
+            </tr>
+            <tr>
+              <td><strong>Disposable Temp Mail</strong></td>
+              <td class="col-privacraft"><span class="status-check">✓</span> Built-in with Auto OTP</td>
+              <td><span class="status-cross">✗</span> Not Available</td>
+              <td><span class="status-cross">✗</span> Not Available</td>
+              <td><span class="status-cross">✗</span> Premium Add-on Only</td>
             </tr>
             <tr>
               <td><strong>Analytics &amp; Trackers</strong></td>
               <td class="col-privacraft"><span class="status-check">✓</span> Strictly Zero (0)</td>
               <td><span class="status-cross">✗</span> Loaded with Ads &amp; Beacons</td>
               <td><span class="status-warn">⚠</span> Device Telemetry Active</td>
-              <td><span class="status-warn">⚠</span> Usage Telemetry &amp; Crash Reports</td>
-            </tr>
-            <tr>
-              <td><strong>Integrated Temp Mail</strong></td>
-              <td class="col-privacraft"><span class="status-check">✓</span> Built-in with Auto OTP</td>
-              <td><span class="status-cross">✗</span> Not Available</td>
-              <td><span class="status-cross">✗</span> Not Available</td>
-              <td><span class="status-cross">✗</span> Premium Add-on Only</td>
+              <td><span class="status-warn">⚠</span> Usage Telemetry Active</td>
             </tr>
             <tr>
               <td><strong>Source Code Transparency</strong></td>
@@ -523,58 +491,51 @@
     <!-- Download Center -->
     <section id="downloads" class="download-section">
       <span class="section-badge" style="color: var(--cyan);">[ DISTRIBUTION PORTAL ]</span>
-      <h2 class="section-heading" style="font-size: 2.3rem;">Deploy PrivaCraft to Your Ecosystem</h2>
-      <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto 32px;">Access PrivaCraft via web, install our signed Android package, or run our lightweight Chrome extension.</p>
+      <h2 class="section-heading" style="font-size: 2.2rem;">Deploy PrivaCraft to Your Workspace</h2>
+      <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto 32px;">Every platform is free, open source, and cryptographically verified.</p>
 
       <div class="download-cards">
-        <!-- Card 1: Official APK -->
         <div class="download-card">
           <div>
             <span class="dl-badge">OFFICIAL RELEASE</span>
             <h3 class="dl-title">Android APK v1.0.1</h3>
-            <p class="dl-desc">Targeted for Android 16 (API 36). Fully signed release build for direct sideloading.</p>
+            <p class="dl-desc">Targeted for Android 16 (API 36). Signed release APK for direct sideloading.</p>
           </div>
           <a href="https://github.com/shorbornolabs/privacraft/releases/download/v1.0.1/PrivaCraft-v1.0.1.apk" class="btn btn-primary">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             Download APK (11.9 MB)
           </a>
         </div>
 
-        <!-- Card 2: Google Play Closed Beta -->
         <div class="download-card">
           <div>
             <span class="dl-badge" style="background: rgba(16, 185, 129, 0.1); color: var(--emerald);">IN REVIEW</span>
             <h3 class="dl-title">Google Play Store</h3>
-            <p class="dl-desc">Closed testing track active. Join our tester group to receive automatic verified updates.</p>
+            <p class="dl-desc">Closed testing track active. Join our tester group for automatic updates.</p>
           </div>
           <a href="https://groups.google.com/g/privacraft-testers" target="_blank" rel="noopener" class="btn btn-secondary">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-            Join Tester Community
+            Join Tester Group
           </a>
         </div>
 
-        <!-- Card 3: Chrome Extension -->
         <div class="download-card">
           <div>
             <span class="dl-badge" style="background: rgba(139, 92, 246, 0.1); color: var(--violet);">BROWSER TOOL</span>
             <h3 class="dl-title">Chrome Extension</h3>
-            <p class="dl-desc">Quick autofill and 2FA generator popup for Chrome, Brave, and Edge browsers.</p>
+            <p class="dl-desc">Manifest V3 popup for Chrome, Brave, Edge, Opera, and Kiwi browsers.</p>
           </div>
           <a href="https://github.com/shorbornolabs/privacraft/tree/main/extension" target="_blank" rel="noopener" class="btn btn-secondary">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
             View Extension Source
           </a>
         </div>
 
-        <!-- Card 4: GitHub Source -->
         <div class="download-card">
           <div>
             <span class="dl-badge" style="background: rgba(255, 255, 255, 0.1); color: #fff;">OPEN SOURCE</span>
             <h3 class="dl-title">GitHub Repository</h3>
-            <p class="dl-desc">Inspect code, verify commit signatures, contribute features, or build directly from source.</p>
+            <p class="dl-desc">Inspect code, report issues, contribute features, or build from source.</p>
           </div>
           <a href="https://github.com/shorbornolabs/privacraft" target="_blank" rel="noopener" class="btn btn-cyan">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
             Star on GitHub
           </a>
         </div>
@@ -599,11 +560,11 @@
 
         <div class="faq-item">
           <button class="faq-question">
-            <span>How does the live temporary email work without leaking my identity?</span>
+            <span>How does the disposable temp mail work without leaking my identity?</span>
             <span class="faq-chevron">▼</span>
           </button>
           <div class="faq-answer">
-            PrivaCraft communicates directly with a stateless mail relay. No personal credentials, device identifiers, or IP addresses are linked to your generated address. When your session ends or you click "New Address", the mailbox and tokens expire.
+            PrivaCraft communicates directly with a stateless mail relay. No personal credentials, device identifiers, or IP addresses are linked to your generated address. When your session ends or you click "Discard", the mailbox and tokens expire.
           </div>
         </div>
 
@@ -614,16 +575,6 @@
           </button>
           <div class="faq-answer">
             Yes! PrivaCraft uses standardized RFC 6238 Base32 keys and `otpauth://` formats. You can use the same secrets across the Web Workstation, Android App, and Chrome Extension.
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-question">
-            <span>Why is PrivaCraft completely free and open source?</span>
-            <span class="faq-chevron">▼</span>
-          </button>
-          <div class="faq-answer">
-            Privacy is a fundamental human right. Commercial authenticators often monetize user telemetry or push proprietary cloud lock-in. PrivaCraft is released under the permissive MIT license so anyone can inspect, audit, and run their own copy.
           </div>
         </div>
       </div>
@@ -640,7 +591,7 @@
           </div>
         </div>
 
-        <a href="https://www.linkedin.com/in/azaharonline24/" target="_blank" rel="noopener" class="creator-card" style="text-decoration: none; color: inherit;">
+        <a href="https://www.linkedin.com/in/azaharonline24/" target="_blank" rel="noopener" class="creator-card">
           <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #00f0ff, #8b5cf6); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: #000;">
             MA
           </div>
@@ -652,9 +603,7 @@
       </div>
 
       <div class="footer-bottom">
-        <div>
-          &copy; 2026 PrivaCraft Project. Licensed under the MIT License.
-        </div>
+        <div>&copy; 2026 PrivaCraft Project. Licensed under the MIT License.</div>
         <div style="display: flex; gap: 18px;">
           <a href="https://github.com/shorbornolabs/privacraft/blob/main/PRIVACY_POLICY.md" style="color: var(--text-dim); text-decoration: none;">Privacy Policy</a>
           <a href="https://github.com/shorbornolabs/privacraft" style="color: var(--text-dim); text-decoration: none;">GitHub Source</a>
