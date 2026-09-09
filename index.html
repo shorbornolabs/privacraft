@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PrivaCraft - High-Precision Zero-Knowledge Privacy & Security Suite</title>
-  <meta name="description" content="PrivaCraft is an uncompromising, zero-knowledge privacy suite featuring an offline 2FA authenticator, temporary disposable email inbox with instant OTP extraction, and an entropy-grade password studio.">
-    <meta name="theme-color" content="#06090f">
+  <title>PrivaCraft — High-Precision Zero-Knowledge Privacy &amp; Security Suite</title>
+  <meta name="description" content="Use PrivaCraft directly in your browser: live offline 2FA authenticator, real disposable temp email inbox with instant OTP extraction, and cryptographic password studio.">
+  <meta name="theme-color" content="#06090f">
   <meta property="og:type" content="website">
   <meta property="og:title" content="PrivaCraft — High-Precision Zero-Knowledge Privacy &amp; Security Suite">
   <meta property="og:description" content="Offline RFC 6238 2FA authenticator, temporary disposable email inbox with instant OTP extraction, and cryptographic password studio. Zero telemetry.">
@@ -22,11 +22,35 @@
 </head>
 <body>
 
-  <!-- Matrix Background -->
   <div class="cyber-grid-bg"></div>
-
-  <!-- Toast Notification Portal -->
   <div id="toast-container" class="toast-container"></div>
+
+  <!-- Add 2FA Account Modal -->
+  <div id="add-totp-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="font-size: 1.15rem; font-weight: 700;">Add Custom 2FA Account</h3>
+        <button id="btn-close-add-totp" class="delete-acc-btn" style="font-size: 1.2rem; cursor: pointer;">✕</button>
+      </div>
+      <form id="form-add-totp">
+        <div class="input-group">
+          <label for="input-totp-name">Service / Issuer Name</label>
+          <input type="text" id="input-totp-name" class="custom-input" placeholder="e.g. GitHub, Google, Binance" required>
+        </div>
+        <div class="input-group">
+          <label for="input-totp-account">Account Identifier (Optional)</label>
+          <input type="text" id="input-totp-account" class="custom-input" placeholder="e.g. user@example.com">
+        </div>
+        <div class="input-group">
+          <label for="input-totp-secret">Secret Key (Base32 or otpauth:// URI)</label>
+          <input type="text" id="input-totp-secret" class="custom-input" placeholder="e.g. JBSWY3DPEHPK3PXP" required>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Add to Secure Local Vault</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <div class="page-wrapper">
 
@@ -38,7 +62,8 @@
         <span class="brand-badge">v1.0.1</span>
       </a>
       <ul class="nav-links">
-        <li><a href="#playground">Interactive Lab</a></li>
+        <li><a href="#workstation">Web Workstation</a></li>
+        <li><a href="#threats">Threat Model</a></li>
         <li><a href="#features">Architecture</a></li>
         <li><a href="#matrix">Comparison</a></li>
         <li><a href="#downloads">Downloads</a></li>
@@ -53,17 +78,11 @@
           </svg>
         </button>
         <a href="https://github.com/shorbornolabs/privacraft" target="_blank" rel="noopener" class="btn btn-secondary">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-          </svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
           GitHub
         </a>
         <a href="#downloads" class="btn btn-primary">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
           Get v1.0.1
         </a>
       </div>
@@ -73,60 +92,46 @@
     <section class="hero-section">
       <div class="hero-pill">
         <span class="pulse-dot"></span>
-        <span>READY FOR ANDROID 16 (API 36) • ZERO TELEMETRY</span>
+        <span>ZERO-KNOWLEDGE • ZERO TELEMETRY • CLIENT-SIDE EXECUTION</span>
       </div>
 
       <h1 class="hero-title">
-        The Autonomous Privacy Vault<br>
-        <span class="gradient-text">Engineered for Sovereign Defense.</span>
+        The Sovereign Privacy Workstation.<br>
+        <span class="gradient-text">Zero Install. Total Defense.</span>
       </h1>
 
       <p class="hero-subtitle">
-        PrivaCraft replaces compromised cloud authenticators and ad-injected web tools with an air-gapped, zero-knowledge suite: cryptographic 2FA, disposable temp mail with instant OTP extraction, and biometric vault encryption.
+        PrivaCraft delivers an uncompromising, full-power cybersecurity suite directly in your browser. Generate cryptographic 2FA tokens, receive temporary emails with instant OTP extraction, and build unbreakable passphrases — backed by air-gapped cryptography.
       </p>
 
-      <div class="hero-actions">
-        <a href="https://github.com/shorbornolabs/privacraft/releases/download/v1.0.1/PrivaCraft-v1.0.1.apk" class="btn btn-primary" style="padding: 14px 28px; font-size: 1rem;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          Download APK v1.0.1 (11.9 MB)
+      <div class="platform-pill-bar">
+        <div class="platform-badge active-web">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+          <span>Live Web Workstation (Active)</span>
+        </div>
+        <a href="#downloads" class="platform-badge" style="text-decoration: none; color: var(--text-muted);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+          <span>Native Android App (API 36)</span>
         </a>
-        <a href="#playground" class="btn btn-cyan" style="padding: 14px 24px; font-size: 1rem;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-          </svg>
-          Launch Interactive Lab
+        <a href="#downloads" class="platform-badge" style="text-decoration: none; color: var(--text-muted);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+          <span>Chromium Extension (MV3)</span>
         </a>
       </div>
 
       <div class="hero-specs">
-        <div class="spec-item">
-          <span>ENCRYPTION:</span>
-          <span class="highlight">AES-256-GCM + Argon2id</span>
-        </div>
-        <div class="spec-item">
-          <span>ALGORITHM:</span>
-          <span class="highlight">RFC 6238 TOTP / HOTP</span>
-        </div>
-        <div class="spec-item">
-          <span>TRACKERS:</span>
-          <span class="highlight">0 (Zero Trackers / 0 Logs)</span>
-        </div>
-        <div class="spec-item">
-          <span>LICENSE:</span>
-          <span class="highlight">MIT Open Source</span>
-        </div>
+        <div class="spec-item"><span>CRYPTOGRAPHY:</span><span class="highlight">RFC 6238 Web Crypto HMAC-SHA1</span></div>
+        <div class="spec-item"><span>ISOLATION:</span><span class="highlight">100% Client-Side Local Vault</span></div>
+        <div class="spec-item"><span>TEMP MAIL:</span><span class="highlight">Live Relay + Instant OTP Regex</span></div>
+        <div class="spec-item"><span>LICENSE:</span><span class="highlight">MIT Open Source</span></div>
       </div>
     </section>
 
-    <!-- Interactive Playground Section -->
-    <section id="playground" class="playground-section">
-      <span class="section-badge">[ LIVE FUNCTIONAL SIMULATION ]</span>
-      <h2 class="section-heading">Experience the Defense Engine</h2>
-      <p class="section-desc">Test real cryptographic TOTP calculations, entropy analysis, and disposable email OTP extraction right here in your browser.</p>
+    <!-- The Web Workstation -->
+    <section id="workstation" class="workstation-section">
+      <span class="section-badge">[ THE SOVEREIGN WEB WORKSTATION ]</span>
+      <h2 class="section-heading">Full Defense Tools in Your Browser</h2>
+      <p class="section-desc">No signup, no tracking cookies, no server-side secrets. Use any of the 3 tools below as a production web application right now.</p>
 
       <div class="terminal-card">
         <div class="terminal-header">
@@ -137,117 +142,82 @@
           </div>
           <div class="terminal-tabs">
             <button class="tab-btn active" data-tab="tab-2fa">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-              2FA Authenticator
-            </button>
-            <button class="tab-btn" data-tab="tab-password">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
-              Password Studio
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              2FA Vault
             </button>
             <button class="tab-btn" data-tab="tab-mail">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-              Temp Mail & OTP
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              Live Temp Mail
+            </button>
+            <button class="tab-btn" data-tab="tab-password">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
+              Password Studio
             </button>
           </div>
-          <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-dim);">TERMINAL // SECURE_ISOLATION</span>
+          <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--emerald);">● WORKSTATION ONLINE</span>
         </div>
 
-        <!-- Tab 1: 2FA Authenticator -->
+        <!-- 1. 2FA Vault Tab -->
         <div id="tab-2fa" class="tab-content active">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div class="totp-controls-bar">
             <div>
-              <h3 style="font-size: 1.15rem; font-weight: 700;">Live RFC 6238 TOTP Monitor</h3>
-              <p style="font-size: 0.82rem; color: var(--text-muted);">Codes regenerate strictly on a synchronized 30-second interval.</p>
+              <h3 style="font-size: 1.15rem; font-weight: 700;">Live RFC 6238 Authenticator Vault</h3>
+              <p style="font-size: 0.82rem; color: var(--text-muted);">Real Web Crypto calculation. Add your own 2FA keys or use sample vaults below.</p>
             </div>
-            <div style="display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 0.8rem; color: var(--cyan);">
-              <svg class="totp-timer-svg" viewBox="0 0 36 36">
-                <path class="totp-circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                <path id="totp-timer-circle" class="totp-circle-progress" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-              </svg>
-              <span>30s CYCLE</span>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <button id="btn-open-add-totp" class="btn btn-cyan" style="font-size: 0.8rem; padding: 8px 16px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                + Add 2FA Key
+              </button>
+              <div style="display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 0.82rem; color: var(--cyan);">
+                <svg class="totp-timer-svg" viewBox="0 0 36 36">
+                  <path class="totp-circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path id="totp-timer-circle" class="totp-circle-progress" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+                <span id="totp-seconds-label">30s</span>
+              </div>
             </div>
           </div>
 
-          <div class="totp-grid">
-            <!-- Card 1: GitHub -->
-            <div class="totp-card">
-              <div class="totp-meta">
-                <div class="totp-issuer">
-                  <div class="totp-icon" style="background: #24292e; color: #fff;">GH</div>
-                  <div>
-                    <div class="totp-name">GitHub Production</div>
-                    <div class="totp-account">dev@shorborno.io</div>
-                  </div>
-                </div>
-              </div>
-              <div class="totp-code-display">
-                <span class="totp-code" id="code-github">849 204</span>
-                <button class="copy-mini-btn" onclick="copyToClipboard(document.getElementById('code-github').innerText, 'GitHub TOTP')" title="Copy Code">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                </button>
-              </div>
-            </div>
-
-            <!-- Card 2: Cloudflare -->
-            <div class="totp-card">
-              <div class="totp-meta">
-                <div class="totp-issuer">
-                  <div class="totp-icon" style="background: #f38020; color: #fff;">CF</div>
-                  <div>
-                    <div class="totp-name">Cloudflare Zero Trust</div>
-                    <div class="totp-account">admin@privacraft.org</div>
-                  </div>
-                </div>
-              </div>
-              <div class="totp-code-display">
-                <span class="totp-code" id="code-cloudflare">617 893</span>
-                <button class="copy-mini-btn" onclick="copyToClipboard(document.getElementById('code-cloudflare').innerText, 'Cloudflare TOTP')" title="Copy Code">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                </button>
-              </div>
-            </div>
-
-            <!-- Card 3: Proton -->
-            <div class="totp-card">
-              <div class="totp-meta">
-                <div class="totp-issuer">
-                  <div class="totp-icon" style="background: #6d4aff; color: #fff;">PM</div>
-                  <div>
-                    <div class="totp-name">ProtonMail Sentinel</div>
-                    <div class="totp-account">sec-ops@pm.me</div>
-                  </div>
-                </div>
-              </div>
-              <div class="totp-code-display">
-                <span class="totp-code" id="code-proton">390 152</span>
-                <button class="copy-mini-btn" onclick="copyToClipboard(document.getElementById('code-proton').innerText, 'ProtonMail TOTP')" title="Copy Code">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                </button>
-              </div>
-            </div>
-
-            <!-- Card 4: AWS -->
-            <div class="totp-card">
-              <div class="totp-meta">
-                <div class="totp-issuer">
-                  <div class="totp-icon" style="background: #ff9900; color: #111;">AWS</div>
-                  <div>
-                    <div class="totp-name">AWS Root Account</div>
-                    <div class="totp-account">root@cloud-vault</div>
-                  </div>
-                </div>
-              </div>
-              <div class="totp-code-display">
-                <span class="totp-code" id="code-aws">729 448</span>
-                <button class="copy-mini-btn" onclick="copyToClipboard(document.getElementById('code-aws').innerText, 'AWS TOTP')" title="Copy Code">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                </button>
-              </div>
-            </div>
+          <div id="totp-cards-container" class="totp-grid">
+            <!-- Populated dynamically by app.js with real Web Crypto TOTP codes -->
           </div>
         </div>
 
-        <!-- Tab 2: Password Studio -->
+        <!-- 2. Live Temp Mail Tab -->
+        <div id="tab-mail" class="tab-content">
+          <div class="mail-bar">
+            <div>
+              <span style="font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; font-family: var(--font-mono); display: block;">Your Active Throwaway Address:</span>
+              <span id="active-mail-address" class="active-inbox-email">Allocating secure mailbox...</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <select id="tempmail-domain-picker" class="custom-select" style="font-size: 0.8rem; padding: 6px 10px;">
+                <option value="uberip.com">@uberip.com</option>
+              </select>
+              <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 7px 14px;" onclick="copyToClipboard(document.getElementById('active-mail-address').innerText, 'Email Address')">
+                Copy Email
+              </button>
+              <button id="btn-create-new-mail" class="btn btn-secondary" style="font-size: 0.8rem; padding: 7px 14px;" title="Discard and generate new address">
+                New Address
+              </button>
+              <button id="btn-refresh-inbox" class="btn btn-primary" style="font-size: 0.8rem; padding: 7px 14px;">
+                Check Inbox (<span id="mail-msg-count">0</span>)
+              </button>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+            <span style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">Incoming Live Inbound Stream:</span>
+            <span style="font-size: 0.75rem; color: var(--emerald); font-family: var(--font-mono);">AUTO-REFRESH ACTIVE (6s)</span>
+          </div>
+
+          <div id="mail-messages-container" class="mail-messages-box">
+            <!-- Messages populated dynamically via Mail.tm API -->
+          </div>
+        </div>
+
+        <!-- 3. Password Studio Tab -->
         <div id="tab-password" class="tab-content">
           <div class="password-box">
             <span id="pwd-display" class="password-text">kP9#vX2$mQ8*zL1!</span>
@@ -256,8 +226,8 @@
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
                 Regenerate
               </button>
-              <button class="btn btn-cyan" onclick="copyToClipboard(document.getElementById('pwd-display').innerText, 'Password')">
-                Copy
+              <button id="btn-copy-pwd" class="btn btn-cyan">
+                Copy Password
               </button>
             </div>
           </div>
@@ -306,60 +276,56 @@
                 </div>
               </div>
               <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--emerald); background: rgba(16, 185, 129, 0.1); padding: 4px 10px; border-radius: 6px;">
-                CRYPTOGRAPHICALLY SECURE (CSPRNG)
+                CSPRNG REJECTION SAMPLING (ZERO MODULO BIAS)
               </span>
+            </div>
+
+            <!-- Password History Tray -->
+            <div class="history-tray">
+              <div class="history-header">
+                <span style="font-size: 0.82rem; font-family: var(--font-mono); color: var(--text-muted); text-transform: uppercase;">
+                  Session Copied Passwords History (Last 10)
+                </span>
+                <button id="btn-clear-pwd-history" class="btn btn-secondary" style="font-size: 0.72rem; padding: 4px 10px;">Clear History</button>
+              </div>
+              <div id="password-history-list" class="history-list">
+                <!-- Dynamically populated from localStorage -->
+              </div>
             </div>
           </div>
         </div>
+      </div>
+    </section>
 
-        <!-- Tab 3: Temp Mail & OTP -->
-        <div id="tab-mail" class="tab-content">
-          <div class="mail-terminal">
-            <div class="mail-bar">
-              <div>
-                <span style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; font-family: var(--font-mono); display: block;">Simulated Inbox Address:</span>
-                <span class="active-inbox-email">sec-relay.9482@privacraft.tmp</span>
-              </div>
-              <div style="display: flex; gap: 8px;">
-                <button class="btn btn-secondary" style="font-size: 0.78rem; padding: 6px 12px;" onclick="copyToClipboard('sec-relay.9482@privacraft.tmp', 'Disposable Email')">
-                  Copy Address
-                </button>
-                <button class="btn btn-primary" style="font-size: 0.78rem; padding: 6px 12px;" onclick="showToast('Polling inbox...')">
-                  Sync Inbox
-                </button>
-              </div>
-            </div>
+    <!-- Threat Breakdown: Why Sovereign Privacy Matters -->
+    <section id="threats" class="threat-section">
+      <span class="section-badge">[ THREAT INTELLIGENCE ]</span>
+      <h2 class="section-heading">Why Sovereign Defense is Mandatory</h2>
+      <p class="section-desc">Conventional tools compromise privacy in insidious ways. Here is what PrivaCraft protects you against.</p>
 
-            <div class="mail-inbox-list">
-              <div class="mail-item">
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                  <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-weight: 700; font-size: 0.95rem;">GitHub Security Alert</span>
-                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: var(--font-mono);">Just now</span>
-                  </div>
-                  <span style="font-size: 0.82rem; color: var(--text-muted);">Your device verification code is 492019. Valid for 10 minutes.</span>
-                </div>
-                <div class="mail-otp-badge" onclick="copyToClipboard('492019', 'OTP 492019')" style="cursor: pointer;" title="Click to copy OTP">
-                  <span>OTP: 492019</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                </div>
-              </div>
+      <div class="threat-grid">
+        <div class="threat-card">
+          <span class="threat-badge">VECTOR 01: SEED INTERCEPTION</span>
+          <h4>The Danger of Shady Web 2FA</h4>
+          <p>Online generators like <em>2fa.live</em> transmit secret seeds over remote HTTP endpoints. Anyone with access to server logs or network sniffers can duplicate your authenticators permanently.</p>
+        </div>
 
-              <div class="mail-item">
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                  <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-weight: 700; font-size: 0.95rem;">Discord Confirmation</span>
-                    <span style="font-size: 0.75rem; color: var(--text-dim); font-family: var(--font-mono);">2 mins ago</span>
-                  </div>
-                  <span style="font-size: 0.82rem; color: var(--text-muted);">Confirm login attempt from Windows. Code: 771204</span>
-                </div>
-                <div class="mail-otp-badge" onclick="copyToClipboard('771204', 'OTP 771204')" style="cursor: pointer;" title="Click to copy OTP">
-                  <span>OTP: 771204</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="threat-card">
+          <span class="threat-badge">VECTOR 02: BIG TECH LOCK-IN</span>
+          <h4>The Cloud Sync Trap</h4>
+          <p>Mainstream authenticators link your 2FA seeds to a single monolithic corporate account. If that account is flagged, locked, or SIM-swapped, you lose access to all your digital infrastructure.</p>
+        </div>
+
+        <div class="threat-card">
+          <span class="threat-badge">VECTOR 03: IDENTITY SCRAPING</span>
+          <h4>Spam & Data Broker Tracking</h4>
+          <p>Entering your personal email address into signup forms links your real identity to thousands of marketing brokers. Disposable temp mail acts as an impermeable blast shield.</p>
+        </div>
+
+        <div class="threat-card">
+          <span class="threat-badge">VECTOR 04: CREDENTIAL STUFFING</span>
+          <h4>Weak Password Re-use</h4>
+          <p>Over 80% of data breaches originate from reused or predictable passwords. Cryptographic entropy with CSPRNG ensures passwords resist trillion-guess supercomputing arrays.</p>
         </div>
       </div>
     </section>
@@ -371,7 +337,6 @@
       <p class="section-desc">Every subsystem was architected from the ground up for strict isolation, impenetrable encryption, and high velocity.</p>
 
       <div class="features-grid">
-        <!-- Feature 1 -->
         <div class="feature-card">
           <div class="feature-icon-wrapper">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
@@ -383,11 +348,10 @@
           <div class="feature-tags">
             <span class="tech-tag">AES-256-GCM</span>
             <span class="tech-tag">Argon2id</span>
-            <span class="tech-tag">Android Keystore</span>
+            <span class="tech-tag">Hardware Keystore</span>
           </div>
         </div>
 
-        <!-- Feature 2 -->
         <div class="feature-card">
           <div class="feature-icon-wrapper">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
@@ -403,23 +367,21 @@
           </div>
         </div>
 
-        <!-- Feature 3 -->
         <div class="feature-card">
           <div class="feature-icon-wrapper">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
           </div>
-          <h3 class="feature-title">Disposable Email & OTP Extraction</h3>
+          <h3 class="feature-title">Disposable Email &amp; OTP Extraction</h3>
           <p class="feature-text">
-            Spin up instant throwaway mailboxes to protect your real identity from marketing scrapers and credential stuffing. Features automated regex-driven OTP extraction directly to your clipboard.
+            Spin up instant throwaway mailboxes to protect your real identity from scrapers. Features automated regex-driven OTP extraction directly to your clipboard.
           </p>
           <div class="feature-tags">
             <span class="tech-tag">Spam Shield</span>
             <span class="tech-tag">Auto OTP</span>
-            <span class="tech-tag">Instant Destroy</span>
+            <span class="tech-tag">Stateless Relay</span>
           </div>
         </div>
 
-        <!-- Feature 4 -->
         <div class="feature-card">
           <div class="feature-icon-wrapper">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
@@ -435,14 +397,13 @@
           </div>
         </div>
 
-        <!-- Feature 5 -->
         <div class="feature-card">
           <div class="feature-icon-wrapper">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
           </div>
           <h3 class="feature-title">Cross-Platform Sovereign Sync</h3>
           <p class="feature-text">
-            Import and export encrypted backups anytime in standardized formats. Seamlessly switch between the Android App, Chrome Extension, and Offline Desktop workstation without vendor lock-in.
+            Import and export encrypted backups anytime. Seamlessly switch between the Android App, Chrome Extension, and Web workstation without vendor lock-in.
           </p>
           <div class="feature-tags">
             <span class="tech-tag">Android 16 Ready</span>
@@ -451,12 +412,11 @@
           </div>
         </div>
 
-        <!-- Feature 6 -->
         <div class="feature-card">
           <div class="feature-icon-wrapper">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
           </div>
-          <h3 class="feature-title">Zero Telemetry & 0 Third-Party SDKs</h3>
+          <h3 class="feature-title">Zero Telemetry &amp; 0 SDK Trackers</h3>
           <p class="feature-text">
             No Google Analytics, no Firebase Crashlytics, no Facebook SDK, and no advertising beacons. 100% open-source codebase auditable on GitHub by the global security community.
           </p>
@@ -472,8 +432,8 @@
     <!-- App Showcase Gallery -->
     <section class="showcase-section">
       <span class="section-badge">[ PRODUCTION SCREENS ]</span>
-      <h2 class="section-heading">Engineered for Extreme Clarity</h2>
-      <p class="section-desc" style="margin: 0 auto 32px;">Clean obsidian glass interfaces optimized for one-handed operation and split-second verification.</p>
+      <h2 class="section-heading">Native Android 16 App Interface</h2>
+      <p class="section-desc" style="margin: 0 auto 32px;">Obsidian glass layout built with Jetpack Compose, optimized for one-handed operation and split-second biometric auth.</p>
 
       <div class="gallery-grid">
         <div class="gallery-card">
@@ -535,11 +495,11 @@
               <td><span class="status-check">✓</span> Supported with local cache</td>
             </tr>
             <tr>
-              <td><strong>Analytics & Trackers</strong></td>
+              <td><strong>Analytics &amp; Trackers</strong></td>
               <td class="col-privacraft"><span class="status-check">✓</span> Strictly Zero (0)</td>
-              <td><span class="status-cross">✗</span> Loaded with Ads & Beacons</td>
+              <td><span class="status-cross">✗</span> Loaded with Ads &amp; Beacons</td>
               <td><span class="status-warn">⚠</span> Device Telemetry Active</td>
-              <td><span class="status-warn">⚠</span> Usage Telemetry & Crash Reports</td>
+              <td><span class="status-warn">⚠</span> Usage Telemetry &amp; Crash Reports</td>
             </tr>
             <tr>
               <td><strong>Integrated Temp Mail</strong></td>
@@ -563,8 +523,8 @@
     <!-- Download Center -->
     <section id="downloads" class="download-section">
       <span class="section-badge" style="color: var(--cyan);">[ DISTRIBUTION PORTAL ]</span>
-      <h2 class="section-heading" style="font-size: 2.3rem;">Deploy PrivaCraft to Your Workspace</h2>
-      <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto 32px;">Choose your target deployment platform. Every release is cryptographically signed and independently verifiable.</p>
+      <h2 class="section-heading" style="font-size: 2.3rem;">Deploy PrivaCraft to Your Ecosystem</h2>
+      <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto 32px;">Access PrivaCraft via web, install our signed Android package, or run our lightweight Chrome extension.</p>
 
       <div class="download-cards">
         <!-- Card 1: Official APK -->
@@ -600,7 +560,7 @@
             <h3 class="dl-title">Chrome Extension</h3>
             <p class="dl-desc">Quick autofill and 2FA generator popup for Chrome, Brave, and Edge browsers.</p>
           </div>
-          <a href="https://github.com/shorbornolabs/privacraft/tree/main/chrome-extension" target="_blank" rel="noopener" class="btn btn-secondary">
+          <a href="https://github.com/shorbornolabs/privacraft/tree/main/extension" target="_blank" rel="noopener" class="btn btn-secondary">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
             View Extension Source
           </a>
@@ -623,47 +583,47 @@
 
     <!-- FAQ Accordion -->
     <section id="faq" class="faq-section">
-      <span class="section-badge" style="text-align: center; display: block;">[ QUESTIONS & TECHNICAL ANSWERS ]</span>
+      <span class="section-badge" style="text-align: center; display: block;">[ QUESTIONS &amp; TECHNICAL ANSWERS ]</span>
       <h2 class="section-heading" style="text-align: center;">Frequently Asked Questions</h2>
 
       <div class="faq-list">
         <div class="faq-item active">
           <button class="faq-question">
-            <span>Does PrivaCraft require internet access to generate 2FA tokens?</span>
+            <span>Are my 2FA secret keys safe when using the Web Workstation?</span>
             <span class="faq-chevron">▼</span>
           </button>
           <div class="faq-answer">
-            No. The 2FA authenticator module strictly adheres to RFC 6238 and operates completely air-gapped without an active network connection. Your cryptographic secret keys remain isolated in encrypted local storage.
+            Yes, completely. All 2FA secret keys remain stored exclusively inside your browser's local sandbox (`localStorage`). Web Crypto computes the HMAC-SHA1 signature entirely client-side. No secret keys or generated OTP codes are ever sent to any remote server.
           </div>
         </div>
 
         <div class="faq-item">
           <button class="faq-question">
-            <span>How does the disposable Temp Mail module work without logging my identity?</span>
+            <span>How does the live temporary email work without leaking my identity?</span>
             <span class="faq-chevron">▼</span>
           </button>
           <div class="faq-answer">
-            PrivaCraft provisions ephemeral, stateless mailboxes via a zero-log temporary mail relay. No device fingerprints, IP addresses, or personal credentials are ever linked to your generated addresses. Mailboxes auto-expire and are permanently wiped.
+            PrivaCraft communicates directly with a stateless mail relay. No personal credentials, device identifiers, or IP addresses are linked to your generated address. When your session ends or you click "New Address", the mailbox and tokens expire.
           </div>
         </div>
 
         <div class="faq-item">
           <button class="faq-question">
-            <span>Can I import my existing 2FA tokens from Google Authenticator or Bitwarden?</span>
+            <span>Can I import my 2FA keys into the Android App or Chrome Extension?</span>
             <span class="faq-chevron">▼</span>
           </button>
           <div class="faq-answer">
-            Yes! PrivaCraft provides universal encrypted JSON and CSV import and export capabilities, allowing seamless migration to and from standard authenticators without vendor entrapment.
+            Yes! PrivaCraft uses standardized RFC 6238 Base32 keys and `otpauth://` formats. You can use the same secrets across the Web Workstation, Android App, and Chrome Extension.
           </div>
         </div>
 
         <div class="faq-item">
           <button class="faq-question">
-            <span>What target Android API version does PrivaCraft support?</span>
+            <span>Why is PrivaCraft completely free and open source?</span>
             <span class="faq-chevron">▼</span>
           </button>
           <div class="faq-answer">
-            PrivaCraft v1.0.1 is compiled targeting Android 16 (API Level 36), the latest Android platform standard, with full backward compatibility down to Android 7.0 (Nougat, API 24).
+            Privacy is a fundamental human right. Commercial authenticators often monetize user telemetry or push proprietary cloud lock-in. PrivaCraft is released under the permissive MIT license so anyone can inspect, audit, and run their own copy.
           </div>
         </div>
       </div>
@@ -676,11 +636,10 @@
           <img src="assets/playstore-icon-512.png" alt="PrivaCraft Icon" style="width: 32px; height: 32px; border-radius: 8px;">
           <div>
             <div style="font-weight: 800; font-size: 1rem;">PrivaCraft</div>
-            <div style="font-size: 0.75rem; color: var(--text-dim);">By Shorborno Labs • Zero Knowledge Sovereign Vault</div>
+            <div style="font-size: 0.75rem; color: var(--text-dim);">By Shorborno Labs • Sovereign Privacy Defense</div>
           </div>
         </div>
 
-        <!-- Creator Profile Card -->
         <a href="https://www.linkedin.com/in/azaharonline24/" target="_blank" rel="noopener" class="creator-card" style="text-decoration: none; color: inherit;">
           <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #00f0ff, #8b5cf6); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: #000;">
             MA
@@ -697,9 +656,9 @@
           &copy; 2026 PrivaCraft Project. Licensed under the MIT License.
         </div>
         <div style="display: flex; gap: 18px;">
-          <a href="https://github.com/shorbornolabs/privacraft/blob/main/PRIVACY-POLICY.md" style="color: var(--text-dim); text-decoration: none;">Privacy Policy</a>
-          <a href="https://github.com/shorbornolabs/privacraft/blob/main/TERMS-OF-SERVICE.md" style="color: var(--text-dim); text-decoration: none;">Terms of Service</a>
+          <a href="https://github.com/shorbornolabs/privacraft/blob/main/PRIVACY_POLICY.md" style="color: var(--text-dim); text-decoration: none;">Privacy Policy</a>
           <a href="https://github.com/shorbornolabs/privacraft" style="color: var(--text-dim); text-decoration: none;">GitHub Source</a>
+          <a href="https://privacraft.vercel.app/" style="color: var(--cyan); text-decoration: none;">Live Web App</a>
         </div>
       </div>
     </footer>
