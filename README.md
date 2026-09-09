@@ -1,5 +1,6 @@
 # PrivaCraft — Temp Mail, 2FA Vault & Password Studio
 
+[![Live Overview](https://img.shields.io/badge/Overview%20Page-Interactive%20Suite-00f0ff?logo=html5&logoColor=white)](overview-page/)
 [![Chrome Manifest V3](https://img.shields.io/badge/Chrome-Manifest%20V3-blue?logo=googlechrome&logoColor=white)](extension/)
 [![Android App](https://img.shields.io/badge/Android-Jetpack%20Compose-3DDC84?logo=android&logoColor=white)](privacraft-android/)
 [![Download APK](https://img.shields.io/badge/Release-PrivaCraft--v1.0.1.apk-orange?logo=android&logoColor=white)](https://github.com/shorbornolabs/privacraft/releases/latest)
