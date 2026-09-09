@@ -73,14 +73,25 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 24px;
-  background: rgba(11, 17, 30, 0.9);
+  padding: 10px 20px;
+  background: rgba(11, 17, 30, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-subtle);
   border-radius: 999px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  margin-bottom: 32px;
+  margin-bottom: 28px;
+  white-space: nowrap;
+  gap: 16px;
+}
+
+.brand {
+  flex-shrink: 0;
+}
+
+@media (max-width: 1024px) {
+  .nav-links { display: none; }
+  .btn-github-nav { display: none; }
 }
 
 .brand {
@@ -274,13 +285,40 @@ body {
 
 .terminal-header {
   background: var(--bg-surface-elevated);
-  padding: 12px 20px;
+  padding: 12px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border-subtle);
-  flex-wrap: wrap;
-  gap: 12px;
+  gap: 14px;
+}
+
+.terminal-dots {
+  display: flex;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+.terminal-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.terminal-tabs::-webkit-scrollbar { display: none; }
+
+.workstation-status-text {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--emerald);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+@media (max-width: 680px) {
+  .workstation-status-text { display: none; }
+  .terminal-header { justify-content: flex-start; }
 }
 
 .terminal-dots { display: flex; gap: 8px; }
@@ -982,7 +1020,24 @@ input[type=range] { width: 100%; accent-color: var(--cyan); cursor: pointer; }
    PAGE SECTIONS: THREATS, ARCHITECTURE, COMPARISON, DOWNLOADS, FAQ
    ============================================================================= */
 .threat-section { margin: 80px 0; }
-.threat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-top: 28px; }
+.threat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 28px;
+}
+
+@media (max-width: 960px) {
+  .threat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .threat-grid {
+    grid-template-columns: 1fr;
+  }
+}
 .threat-card { background: rgba(244, 63, 94, 0.03); border: 1px solid rgba(244, 63, 94, 0.2); border-radius: 14px; padding: 22px; }
 .threat-badge { font-family: var(--font-mono); font-size: 0.72rem; color: var(--rose); background: rgba(244, 63, 94, 0.1); padding: 2px 8px; border-radius: 6px; display: inline-block; margin-bottom: 10px; }
 .threat-card h4 { font-size: 1.05rem; margin-bottom: 8px; }
