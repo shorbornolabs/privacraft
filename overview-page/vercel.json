@@ -33,5 +33,17 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    {
+      "source": "/overview-page",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/overview-page/(.*)",
+      "destination": "/",
+      "permanent": false
+    }
   ]
 }
